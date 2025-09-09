@@ -1,0 +1,11 @@
+i will use :
+
+ - react icons
+ - Mui 
+ - Flowbit
+ - Zod
+ - react hook form
+ - shadcn
+ - Framer Motion 
+ - Redux Toolkit
+ - 
