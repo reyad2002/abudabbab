@@ -14,8 +14,8 @@ export const trips = [
     img4: "/img/p4.jpg",
     img5: "/img/p4.jpg",
     price: [
-      { type: "Adult", amount_egy: 20*50 , amount_euro: 20 },
-      { type: "Child", amount_egy: 10*50 , amount_euro: 10 },
+      { type: "Adult", amount_egy: 20 * 50, amount_euro: 20 },
+      { type: "Child", amount_egy: 10 * 50, amount_euro: 10 },
     ],
     from: "8",
     to: "4",
@@ -48,14 +48,16 @@ export const trips = [
   {
     id: "2",
     title: "Escape Day",
+    desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+
     img: "/img/p5.jpg",
     img2: "/img/p5.jpg",
     img3: "/img/p5.jpg",
     img4: "/img/p5.jpg",
     img5: "/img/p5.jpg",
-     price: [
-      { type: "Adult", amount_egy: 30*50 , amount_euro: 30 },
-      { type: "Child", amount_egy: 10*50 , amount_euro: 10 },
+    price: [
+      { type: "Adult", amount_egy: 30 * 50, amount_euro: 30 },
+      { type: "Child", amount_egy: 10 * 50, amount_euro: 10 },
     ],
     from: "8",
     to: "4",
@@ -88,14 +90,16 @@ export const trips = [
   {
     id: "3",
     title: "Relax Day",
+    desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+
     img: "/img/p3.jpg",
     img2: "/img/p3.jpg",
     img3: "/img/p3.jpg",
     img4: "/img/p3.jpg",
     img5: "/img/p3.jpg",
-     price: [
-      { type: "Adult", amount_egy: 40*50 , amount_euro: 40 },
-      { type: "Child", amount_egy: 10*50 , amount_euro: 10 },
+    price: [
+      { type: "Adult", amount_egy: 40 * 50, amount_euro: 40 },
+      { type: "Child", amount_egy: 10 * 50, amount_euro: 10 },
     ],
     from: "8",
     to: "4",

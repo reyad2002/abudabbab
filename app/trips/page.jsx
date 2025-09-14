@@ -1,8 +1,9 @@
 "use client";
 import React from "react";
 import { motion } from "framer-motion";
-import {trips} from '../../trips.js'
+// import {trips} from '../../trips.js'
 import Link from "next/link.js";
+import {useSelector} from 'react-redux'
 /* ------- data (could be fetched from an API) ------- */
 
 
@@ -24,6 +25,8 @@ const item = {
 };
 
 export default function TripsSection() {
+  const trips = useSelector((state) => state.trips);
+  console.log(trips);
   // console.log(params);
   return (
     <section id="trips" className="bg-main py-16 overflow-hidden">
@@ -72,7 +75,7 @@ export default function TripsSection() {
           whileInView="show"
           viewport={{ once: true, amount: 0.2 }}
         >
-          {trips.map((t) => (
+          {trips.trips.map((t) => (
             <motion.article
               key={t.id}
               variants={item}
