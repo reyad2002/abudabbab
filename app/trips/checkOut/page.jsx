@@ -1,8 +1,7 @@
 "use client";
 import React from "react";
 import { useForm } from "react-hook-form";
-import { useSelector } from "react-redux";
-import { useDispatch } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { addBooking } from "../../store/bookingSlice";
 import {
   FiClock,
@@ -25,7 +24,6 @@ export default function CheckoutSection() {
   const b = bookingState.bookings;
   const dispatch = useDispatch();
 
-  console.log(b);
   const {
     register,
     handleSubmit,
@@ -40,6 +38,7 @@ export default function CheckoutSection() {
       message: b?.contactInfo?.message || "",
     },
   });
+
   React.useEffect(() => {
     if (b?.contactInfo) {
       reset({
@@ -71,13 +70,14 @@ export default function CheckoutSection() {
   const children = Number(b?.data?.child ?? 0);
 
   const transferFee = b?.data?.transfer ? 25 : 0;
-  const total = adultPriceEuro * adults + childPriceEuro * children + transferFee;
+  const total =
+    adultPriceEuro * adults + childPriceEuro * children + transferFee;
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Top banners */}
       <div className="max-w-6xl mx-auto px-4 pt-6">
-        <p className="text-[40px]  p-1 rounded-3xl text-black text-center font-bold ">
+        <p className="text-[40px] p-1 rounded-3xl text-black text-center font-bold ">
           Check Out ..
         </p>
       </div>
@@ -152,7 +152,6 @@ export default function CheckoutSection() {
               registerOpts={register("phone", {
                 required: "Phone is required",
                 pattern: {
-                  // Simple, permissive phone pattern
                   value: /^[+()\-.\s0-9]{7,20}$/,
                   message: "Enter a valid phone number",
                 },
@@ -212,17 +211,10 @@ export default function CheckoutSection() {
                   {b?.data?.transfer ? "required" : "not required"}
                 </Row>
                 <Row icon={<FiUsers />} label="Participants">
-                  {adults} Adult{adults === 1 ? "" : "s"} | {children} child{children === 1 ? "" : "ren"}
+                  {adults} Adult{adults === 1 ? "" : "s"} | {children} child
+                  {children === 1 ? "" : "ren"}
                 </Row>
               </dl>
-
-              {/* <button
-                type="button"
-                className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-blue-700 hover:underline"
-              >
-                <FiTag />
-                Enter promo, credit, or gift code
-              </button> */}
 
               {/* /////////total/////////// */}
               <div className="mt-4 border-t pt-4 flex items-end justify-between">

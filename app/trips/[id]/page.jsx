@@ -1,12 +1,11 @@
 "use client";
 import Link from "next/link";
-import React, { use, useEffect } from "react";
+import React, { use, useEffect, useMemo, useState } from "react";
 import { FaHeart } from "react-icons/fa6";
 import { IoMdShare } from "react-icons/io";
 import { useForm } from "react-hook-form";
-import { useSelector } from "react-redux";
-import { useDispatch } from "react-redux";
-import { addBooking } from "../../store/bookingSlice";
+import { useSelector, useDispatch } from "react-redux";
+import { addBooking, setBookingDetails } from "../../store/bookingSlice";
 import { useRouter } from "next/navigation";
 
 const Dot = () => (
@@ -30,7 +29,6 @@ const Page = ({ params }) => {
   const dispatch = useDispatch();
   const router = useRouter();
 
-  // react form hook
   const {
     register,
     handleSubmit,
@@ -38,29 +36,60 @@ const Page = ({ params }) => {
     watch,
   } = useForm({ defaultValues: { adult: 1, child: 0, date: "" } });
 
+  // const [totalEgp, setTotalEgp] = useState(0);
+  // const [totalEuro, setTotalEuro] = useState(0);
+  const adultValue = watch("adult");
+  const childValue = watch("child");
+
+  // التحديث عند تغيير عدد البالغين
+  const handleAdultChange = (e) => {
+    setAdultCount(e.target.value);
+  };
+
+  // التحديث عند تغيير عدد الأطفال
+  const handleChildChange = (e) => {
+    setChildCount(e.target.value);
+  };
+
   // dynamic route
   const { id } = use(params);
-  const trip = trips.trips.filter((t) => String(t.id) === String(id));
-
+  const trip = trips.trips.filter((t) => String(t._id) === String(id));
   if (trip.length === 0) {
     return null;
   }
-  // handel submit form
+
+  
+  if (trip.length === 0) {
+    return null;
+  }
+
+  // حساب التوتال باستخدام useMemo
+  const totalEgp = useMemo(() => {
+    return trip[0].prices.adult.egp * adultValue + trip[0].prices.child.egp * childValue;
+  }, [adultValue, childValue, trip]);
+
+  const totalEuro = useMemo(() => {
+    return trip[0].prices.adult.euro * adultValue + trip[0].prices.child.euro * childValue;
+  }, [adultValue, childValue, trip]);
+
+  // handle submit form
   const onSubmit = (data) => {
-    dispatch(addBooking({ data : data ,  trip }));
-    router.push("/trips/checkOut")
-    // console.log(booking);
+    console.log({ ...data, totalPrice: { egp: totalEgp, euro: totalEuro } });
+    router.push("/trips/checkOut");
+    dispatch(setBookingDetails({ ...data, totalPrice: { egp: totalEgp, euro: totalEuro } }))
+    
   };
+
+
   useEffect(() => {
-    console.log('bookings updated:', booking);
-    // localStorage.setItem("book" , JSON.stringify(booking)  )
+    console.log("bookings updated:", booking);
   }, [booking]);
 
   return (
     <div>
       {trip.map((t) => (
         <section
-          key={t.id}
+          key={t._id}
           className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
         >
           {/* Brand crumb */}
@@ -71,7 +100,7 @@ const Page = ({ params }) => {
 
           {/* Title */}
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-gray-900">
-            {t.title ?? "Trip"}
+            {t.name ?? "Trip"}
           </h1>
 
           {/* Meta row */}
@@ -93,32 +122,29 @@ const Page = ({ params }) => {
                 <FaHeart className="h-5 w-5" />
                 Add to wishlist
               </button>
-              {/* <button
-                type="button"
-                className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-900 hover:bg-gray-50"
-              >
-                <IoMdShare className="h-5 w-5" />
-                Share
-              </button> */}
             </div>
           </div>
 
           {/* Image collage */}
           <div className="mt-6 grid grid-cols-1 md:grid-cols-12 gap-4">
             <Img
-              src={t.img2}
+              src={t.images[0]}
               alt="Tour bus interior"
               className="md:col-span-3 h-72 md:h-[420px]"
             />
             <Img
-              src={t.img3}
+              src={t.images[1]}
               alt="Grand Canyon Skywalk"
               className="md:col-span-6 h-72 md:h-[420px]"
             />
             <div className="md:col-span-3 grid grid-rows-2 gap-4 h-72 md:h-[420px]">
-              <Img src={t.img4} alt="Canyon rim view" className="row-span-1" />
               <Img
-                src={t.img5}
+                src={t.images[2]}
+                alt="Canyon rim view"
+                className="row-span-1"
+              />
+              <Img
+                src={t.images[3]}
                 alt="Covered picnic area"
                 className="row-span-1"
               ></Img>
@@ -131,7 +157,7 @@ const Page = ({ params }) => {
             <div className="md:col-span-7 lg:col-span-8">
               <h2 className="text-2xl font-semibold">Description</h2>
               <p className="max-w-3xl text-gray-800 leading-relaxed">
-                {t.desc}
+                {t.description}
               </p>
 
               <h2 className="mt-8 text-2xl font-semibold text-gray-900">
@@ -144,7 +170,6 @@ const Page = ({ params }) => {
                     key={f?.title ? `${f.title}-${i}` : i}
                     className="flex gap-4 py-4 border-b last:border-none"
                   >
-                    {/* <div className="shrink-0 text-blue-900/90">{f?.icon}</div> */}
                     <div>
                       <div className="font-semibold text-gray-900">
                         {f?.title}
@@ -167,19 +192,14 @@ const Page = ({ params }) => {
                 <div className="relative rounded-3xl p-[1.5px] bg-gradient-to-br from-blue-300/70 via-yellow-500/30 to-blue-300/70 shadow-[0_12px_40px_-10px_rgba(234,179,8,0.45)]">
                   {/* Panel */}
                   <div className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-[#19377c] to-[#165bd3] text-zinc-100 px-6 py-6">
-                    {/* soft glows */}
-                    <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-blue-400/15 blur-3xl" />
-                    <div className="pointer-events-none absolute -bottom-28 -left-28 h-80 w-80 rounded-full bg-blue-500/10 blur-3xl" />
-
                     <div className="mb-4 text-blue-200 font-semibold tracking-wide uppercase">
                       Enjoy Your Trip
                     </div>
-
                     <div aria-live="polite">
                       <div className="text-xs text-zinc-300/80">From</div>
                       <div className="mt-1 flex items-baseline gap-2">
                         <div className="text-4xl font-black tracking-tight text-white drop-shadow-sm">
-                          {t.price[0].amount_euro}$
+                          {t.prices.adult.euro}$
                         </div>
                         <div className="text-sm text-zinc-300/80">
                           per person
@@ -199,11 +219,11 @@ const Page = ({ params }) => {
                               htmlFor="adult"
                               className="text-[18px] font-semibold text-blue-300"
                             >
-                              {t.price[0].type}
+                              Adult
                             </label>
                             <p className="text-zinc-300">
-                              Price : {t.price[0].amount_euro} $ - (
-                              {t.price[0].amount_egy} EGP)
+                              Price : {t.prices.adult.euro} $ - (
+                              {t.prices.adult.egp} EGP)
                             </p>
                           </div>
                           <input
@@ -221,11 +241,11 @@ const Page = ({ params }) => {
                               htmlFor="child"
                               className="text-[18px] font-semibold text-blue-300"
                             >
-                              {t.price[1].type}
+                              Child
                             </label>
                             <p className="text-zinc-300">
-                              Price : {t.price[1].amount_euro} $ - (
-                              {t.price[1].amount_egy} EGP)
+                              Price : {t.prices.child.euro} $ - (
+                              {t.prices.child.egp} EGP)
                             </p>
                           </div>
                           <input
@@ -236,6 +256,10 @@ const Page = ({ params }) => {
                           />
                         </div>
 
+                          {/* Updated price here */}
+                        <div className="flex items-center justify-between gap-3 rounded-3xl bg-white/5 backdrop-blur ring-1 ring-blue-300/30 hover:ring-blue-300/60 focus-within:ring-blue-400/80 transition px-4 py-3">
+                          Total: {totalEuro} $ / {totalEgp} EGP
+                        </div>
                         {/* Date */}
                         <div className="flex items-center justify-between gap-3 rounded-3xl bg-white/5 backdrop-blur ring-1 ring-blue-300/30 hover:ring-blue-300/60 focus-within:ring-blue-400/80 transition px-4 py-3">
                           <div className="flex flex-col">
@@ -271,13 +295,12 @@ const Page = ({ params }) => {
                             </label>
                           </div>
                         </div>
+
                         <button
-                          // onClick={() => {}}
                           type="submit"
                           className=" cursor-pointer h-12 rounded-3xl bg-gradient-to-r from-blue-400 via-blue-600 to-blue-300 text-black font-semibold tracking-wide shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-[1px] transition"
                         >
                           Book Now
-                          {/* <Link href={`/trips/checkOut`}>Book Now</Link> */}
                         </button>
                       </form>
                     </div>
