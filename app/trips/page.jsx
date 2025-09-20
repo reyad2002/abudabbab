@@ -36,7 +36,7 @@ export default function TripsSection() {
     dispatch(fetchTripsData("https://abudabbba-backend.vercel.app/api/trips"));
   }, [dispatch]);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div className="loader"></div>;
   if (error) return <div>Error: {error}</div>;
 
   return (

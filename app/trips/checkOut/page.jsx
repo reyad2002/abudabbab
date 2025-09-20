@@ -104,7 +104,7 @@ export default function CheckoutSection() {
 
       <main className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* LEFT: Form */}
-        <section className="lg:col-span-2">
+        <section className="lg:col-span-2 order-2 lg:order-1">
           <div className="mb-4">
             <h2 className="text-2xl font-semibold tracking-tight">
               Contact & message
@@ -250,7 +250,7 @@ export default function CheckoutSection() {
         </section>
 
         {/* RIGHT: Order summary */}
-        <aside className="lg:col-span-1">
+        <aside className="lg:col-span-1 order-1 lg:order-2">
           <div className="lg:sticky lg:top-4 space-y-4">
             <div className="bg-white border border-gray-200 rounded-2xl p-4">
               {/* trip info */}

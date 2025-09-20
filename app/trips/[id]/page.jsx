@@ -99,7 +99,7 @@ export default function Page() {
     console.log("bookings updated:", booking);
   }, [booking]);
 
-  if (loading) return <div className="p-6">Loading…</div>;
+  if (loading) return <div className="p-6 loader"></div>;
   if (err) return <div className="p-6 text-red-600">Error: {err}</div>;
   if (!trip) return <div className="p-6">Trip not found.</div>;
 

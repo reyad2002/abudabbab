@@ -16,7 +16,7 @@ export const getAllBookings = createAsyncThunk(
   }
 );
 
-// app/store/bookingSlice.js
+// POST booking
 export const postBooking = createAsyncThunk(
   "bookings/postBooking",
   async ({ url }, { getState, rejectWithValue }) => {
@@ -97,31 +97,7 @@ export const getTotalBookingsAndRevenue = createAsyncThunk(
 // ============ Initial State ============
 
 const initialState = {
-  // tripId: null,
-  // trip: null, // store complete trip if you pass it
-  // userInfo: {
-  //   firstName: "",
-  //   lastName: "",
-  //   email: "",
-  //   phone: "",
-  //   message: "",
-  // },
-  // bookingDetails: {
-  //   adult: 1,
-  //   child: 0,
-  //   transfer: false,
-  //   totalPrice: { egp: 0, euro: 0 },
-  //   bookingDate: "",
-  // },
-  // // request mgmt
-  // list: [],
-  // advancedInfo: null,
-  // totals: null,
-  // loading: false,
-  // error: null,
-  // postLoading: false,
-  // postError: null,
-  // lastCreatedBooking: null,
+ 
 };
 
 // ============ Slice ============
