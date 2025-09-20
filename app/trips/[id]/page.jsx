@@ -122,8 +122,8 @@ export default function Page() {
           <Img src={trip.images?.[0]} alt="img 1" className="md:col-span-3 h-72 md:h-[420px]" />
           <Img src={trip.images?.[1]} alt="img 2" className="md:col-span-6 h-72 md:h-[420px]" />
           <div className="md:col-span-3 grid grid-rows-2 gap-4 h-72 md:h-[420px]">
-            <Img src={trip.images?.[2]} alt="img 3" className="row-span-1" />
-            <Img src={trip.images?.[3]} alt="img 4" className="row-span-1" />
+            <Img src={trip.images?.[1]} alt="img 3" className="row-span-1" />
+            <Img src={trip.images?.[1]} alt="img 4" className="row-span-1" />
           </div>
         </div>
 

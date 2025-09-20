@@ -76,7 +76,7 @@ export default function CheckoutSection() {
   };
 
   // ----- بيانات من الـ state -----
-  const when = bookingState?.bookingDetails?.date || "Not selected";
+  const when = bookingState?.bookingDetails?.bookingDate || "Not selected";
   const transferTxt = bookingState?.bookingDetails?.transfer
     ? "required"
     : "not required";
