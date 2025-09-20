@@ -23,9 +23,9 @@ const tripsStore = configureStore({
     trips: tripsReducer,
     bookings: bookingReducer,
   },
-  // Only preload the bookings slice if available, with the correct nested shape
+  // Preload the bookings slice if available
   preloadedState: preloadedBookingsState
-    ? { bookings: { bookings: preloadedBookingsState } }
+    ? { bookings: preloadedBookingsState }
     : undefined,
 });
 
@@ -34,8 +34,8 @@ if (typeof window !== 'undefined') {
   tripsStore.subscribe(() => {
     try {
       const state = tripsStore.getState();
-      // We only persist the inner bookings object (state.bookings.bookings)
-      const dataToPersist = state?.bookings?.bookings ?? {};
+      // Persist the entire bookings state
+      const dataToPersist = state?.bookings ?? {};
       window.localStorage.setItem(
         'abudabbab:bookings',
         JSON.stringify(dataToPersist)
