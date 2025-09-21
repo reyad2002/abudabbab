@@ -1,15 +1,25 @@
 "use client";
-import { useState } from "react";
-import { BarChart3, Ticket, DollarSign, Euro } from "lucide-react";
 
-// JSX version of Advanced Infos page
-// Requires TailwindCSS & lucide-react icons
+import React, { useMemo, useState } from "react";
+import Link from "next/link";
+import {
+  BarChart3,
+  Ticket,
+  DollarSign,
+  Euro,
+  Search,
+  Calendar,
+  ArrowUpDown,
+  RefreshCcw,
+  Plus,
+} from "lucide-react";
 
+/* ---------------------------------- Data ---------------------------------- */
 const initialTrips = [
   {
     id: "t1",
     name: "Island Escape",
-    price: "$899 / €820",
+    price: { egp: 28000, eur: 820 }, // سعر التذكرة الواحدة (مثال)
     totalBooking: 120,
     totalTickets: 240,
     revenueEGP: 450000,
@@ -20,7 +30,7 @@ const initialTrips = [
   {
     id: "t2",
     name: "Mountain Trek",
-    price: "$1,299 / €1180",
+    price: { egp: 42000, eur: 1180 },
     totalBooking: 80,
     totalTickets: 160,
     revenueEGP: 300000,
@@ -30,223 +40,279 @@ const initialTrips = [
   },
 ];
 
-function StatCard({ icon: Icon, label, value }) {
+/* --------------------------------- Helpers -------------------------------- */
+const fmt = (n) => new Intl.NumberFormat().format(n);
+
+function Pill({ children, variant = "default", className = "" }) {
+  const base =
+    "inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full border";
+  const variants = {
+    default: "border-zinc-700 bg-zinc-800 text-zinc-200",
+    success: "border-emerald-700 bg-emerald-900/30 text-emerald-300",
+    muted: "border-zinc-700 bg-zinc-900/40 text-zinc-400",
+  };
+  return <span className={`${base} ${variants[variant]} ${className}`}>{children}</span>;
+}
+
+/* --------------------------------- Widgets -------------------------------- */
+function StatCard({ icon: Icon, label, value, sub }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-zinc-800 bg-zinc-900/40 px-4 py-6">
-      <Icon className="h-6 w-6 text-zinc-300" />
-      <div className="text-lg font-semibold text-zinc-100">{value}</div>
-      <div className="text-xs text-zinc-400">{label}</div>
+    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4 sm:p-5 shadow-sm">
+      <div className="flex items-center gap-3">
+        <div className="h-10 w-10 rounded-xl grid place-items-center border border-zinc-700 bg-zinc-900">
+          <Icon className="h-5 w-5 text-zinc-200" />
+        </div>
+        <div>
+          <div className="text-xl font-semibold text-zinc-100 leading-tight">
+            {value}
+          </div>
+          <div className="text-xs text-zinc-400">{label}</div>
+        </div>
+      </div>
+      {sub && <div className="mt-3 text-xs text-zinc-500">{sub}</div>}
     </div>
   );
 }
 
-function TripInfoCard({ trip }) {
+function Toolbar({
+  query,
+  setQuery,
+  currency,
+  setCurrency,
+  sortBy,
+  setSortBy,
+  onRefresh,
+}) {
+  return (
+    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-3 sm:p-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      {/* left */}
+      <div className="flex items-center gap-2">
+        <div className="relative">
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-zinc-500" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search trips…"
+            className="pl-9 pr-3 py-2 w-64 rounded-lg border border-zinc-800 bg-zinc-950/60 text-sm outline-none focus:ring-2 focus:ring-zinc-700/50"
+          />
+        </div>
+
+        <button
+          onClick={onRefresh}
+          className="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-zinc-700 bg-zinc-900/60 hover:bg-zinc-900 text-sm"
+        >
+          <RefreshCcw className="h-4 w-4" />
+          Refresh
+        </button>
+      </div>
+
+      {/* right */}
+      <div className="flex items-center gap-2">
+        <div className="hidden sm:flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-950/60 p-1">
+          <button
+            onClick={() => setCurrency("EGP")}
+            className={`px-3 py-1.5 rounded-md text-xs ${
+              currency === "EGP"
+                ? "bg-zinc-900 border border-zinc-700 text-zinc-200"
+                : "text-zinc-400"
+            }`}
+          >
+            EGP
+          </button>
+          <button
+            onClick={() => setCurrency("EUR")}
+            className={`px-3 py-1.5 rounded-md text-xs ${
+              currency === "EUR"
+                ? "bg-zinc-900 border border-zinc-700 text-zinc-200"
+                : "text-zinc-400"
+            }`}
+          >
+            EUR
+          </button>
+        </div>
+
+        <div className="relative">
+          <ArrowUpDown className="absolute left-3 top-2.5 h-4 w-4 text-zinc-500" />
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="appearance-none pl-9 pr-8 py-2 rounded-lg border border-zinc-800 bg-zinc-950/60 text-sm outline-none focus:ring-2 focus:ring-zinc-700/50"
+          >
+            <option value="revenue">Sort: Revenue</option>
+            <option value="bookings">Sort: Bookings</option>
+            <option value="tickets">Sort: Tickets</option>
+            <option value="name">Sort: Name</option>
+          </select>
+        </div>
+
+        <Link
+          href="/dashboard/controlTrips/addTrip"
+          className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-emerald-700 bg-emerald-900/30 hover:bg-emerald-900/40 text-sm"
+        >
+          <Plus className="h-4 w-4" />
+          Add Trip
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function TripRow({ t, currency = "EGP" }) {
+  const revenue =
+    currency === "EGP" ? t.revenueEGP : t.revenueEUR;
+
   return (
     <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 backdrop-blur p-4 sm:p-5 shadow-sm">
-      <div className="grid grid-cols-1 sm:grid-cols-[220px_1fr] gap-4 items-center">
+      <div className="grid grid-cols-1 sm:grid-cols-[220px_1fr_auto] gap-4 items-center">
         {/* image */}
         <div className="overflow-hidden rounded-xl border border-zinc-800 aspect-[16/10] sm:aspect-[3/2]">
-          {trip.image ? (
-            <img src={trip.image} alt={trip.name} className="h-full w-full object-cover" />
+          {t.image ? (
+            <img src={t.image} alt={t.name} className="h-full w-full object-cover" />
           ) : (
-            <div className="h-full w-full grid place-items-center text-zinc-500">image</div>
+            <div className="h-full w-full grid place-items-center text-zinc-500">
+              image
+            </div>
           )}
         </div>
 
         {/* content */}
         <div className="space-y-2">
-          <h3 className="text-base sm:text-lg font-semibold text-zinc-100">{trip.name}</h3>
-          <p className="text-zinc-400 text-sm">Price: {trip.price}</p>
-          <p className="text-zinc-400 text-sm">Total Booking: {trip.totalBooking}</p>
-          <p className="text-zinc-400 text-sm">Total Tickets: {trip.totalTickets}</p>
-          <p className="text-zinc-400 text-sm">Revenue (EGP): {trip.revenueEGP.toLocaleString()}</p>
-          <p className="text-zinc-400 text-sm">Revenue (EUR): {trip.revenueEUR.toLocaleString()}</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="text-lg font-semibold text-zinc-100">{t.name}</h3>
+            <Pill variant="muted">
+              price: {fmt(t.price.egp)} EGP / {fmt(t.price.eur)} €
+            </Pill>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <Pill>bookings: {fmt(t.totalBooking)}</Pill>
+            <Pill>tickets: {fmt(t.totalTickets)}</Pill>
+          </div>
+
+          <div className="text-sm text-zinc-400">
+            <Calendar className="inline-block h-4 w-4 mr-1 align-[-2px]" />
+            last 30 days (sample)
+          </div>
+        </div>
+
+        {/* right */}
+        <div className="sm:text-right">
+          <div className="text-xs text-zinc-400">revenue ({currency})</div>
+          <div className="text-xl font-semibold">{fmt(revenue)}</div>
+          <div className="mt-3 flex gap-2 sm:justify-end">
+            <Link
+              href={`/dashboard/controlTrips/${t.id}`}
+              className="px-3 py-1.5 rounded-lg border border-sky-700 bg-sky-900/30 text-sky-200 text-xs font-medium hover:bg-sky-900/40"
+            >
+              Manage
+            </Link>
+            <Link
+              href="/dashboard/controlTrips"
+              className="px-3 py-1.5 rounded-lg border border-zinc-700 bg-zinc-900/40 text-zinc-300 text-xs font-medium hover:bg-zinc-900"
+            >
+              View
+            </Link>
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
+/* --------------------------------- Page ----------------------------------- */
 export default function AdvancedInfos() {
   const [trips] = useState(initialTrips);
+  const [query, setQuery] = useState("");
+  const [currency, setCurrency] = useState("EGP"); // 'EGP' | 'EUR'
+  const [sortBy, setSortBy] = useState("revenue");
 
-  // totals for top stats
-  const totalBooking = trips.reduce((acc, t) => acc + t.totalBooking, 0);
-  const totalTickets = trips.reduce((acc, t) => acc + t.totalTickets, 0);
-  const revenueEGP = trips.reduce((acc, t) => acc + t.revenueEGP, 0);
-  const revenueEUR = trips.reduce((acc, t) => acc + t.revenueEUR, 0);
+  const filteredSorted = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    let list = trips.filter((t) => t.name.toLowerCase().includes(q));
+
+    list.sort((a, b) => {
+      if (sortBy === "name") return a.name.localeCompare(b.name);
+      if (sortBy === "bookings") return b.totalBooking - a.totalBooking;
+      if (sortBy === "tickets") return b.totalTickets - a.totalTickets;
+      // revenue
+      const ra = currency === "EGP" ? a.revenueEGP : a.revenueEUR;
+      const rb = currency === "EGP" ? b.revenueEGP : b.revenueEUR;
+      return rb - ra;
+    });
+    return list;
+  }, [trips, query, sortBy, currency]);
+
+  const totals = useMemo(() => {
+    return filteredSorted.reduce(
+      (acc, t) => {
+        acc.booking += t.totalBooking;
+        acc.tickets += t.totalTickets;
+        acc.egp += t.revenueEGP;
+        acc.eur += t.revenueEUR;
+        return acc;
+      },
+      { booking: 0, tickets: 0, egp: 0, eur: 0 }
+    );
+  }, [filteredSorted]);
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
-  
-
-      {/* Page body */}
       <main className="max-w-6xl mx-auto px-4 py-6 sm:py-8 space-y-6">
-        {/* Stats row */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <StatCard icon={BarChart3} label="Total Booking" value={totalBooking} />
-          <StatCard icon={Ticket} label="Total Tickets" value={totalTickets} />
-          <StatCard icon={DollarSign} label="Revenue EGP" value={revenueEGP.toLocaleString()} />
-          <StatCard icon={Euro} label="Revenue EUR" value={revenueEUR.toLocaleString()} />
+        {/* top header actions */}
+        <div className="flex items-center justify-between">
+          <h1 className="text-lg sm:text-xl font-semibold">Advanced Infos</h1>
+          <Link
+            href="/dashboard/controlTrips"
+            className="px-3 py-2 rounded-lg border border-zinc-700 bg-zinc-900/60 hover:bg-zinc-900 text-sm"
+          >
+            Back to Trips
+          </Link>
         </div>
 
-        {/* Trip details */}
+        {/* KPIs */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <StatCard icon={BarChart3} label="Total Booking" value={fmt(totals.booking)} />
+          <StatCard icon={Ticket} label="Total Tickets" value={fmt(totals.tickets)} />
+          <StatCard
+            icon={DollarSign}
+            label="Revenue EGP"
+            value={fmt(totals.egp)}
+            sub="All-time gross revenue (EGP)"
+          />
+          <StatCard
+            icon={Euro}
+            label="Revenue EUR"
+            value={fmt(totals.eur)}
+            sub="All-time gross revenue (EUR)"
+          />
+        </div>
+
+        {/* toolbar */}
+        <Toolbar
+          query={query}
+          setQuery={setQuery}
+          currency={currency}
+          setCurrency={setCurrency}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          onRefresh={() => window.location.reload()}
+        />
+
+        {/* list */}
         <div className="space-y-4">
-          {trips.map((trip) => (
-            <TripInfoCard key={trip.id} trip={trip} />
+          {filteredSorted.map((t) => (
+            <TripRow key={t.id} t={t} currency={currency} />
           ))}
-        </div>
-      </main>
-
-      {/* Page frame */}
-      <div className="pointer-events-none fixed inset-4 rounded-3xl border border-zinc-800/80" />
-    </div>
-  );
-}
-
-// =============================
-// Advanced Infos Page (JSX)
-// Create a new file like app/(dashboard)/advanced-infos/page.jsx and paste this component
-// =============================
-export function AdvancedInfosPage() {
-  const [trips] = useState([
-    {
-      id: "t1",
-      name: "Island Escape",
-      image:
-        "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?q=80&w=1400&auto=format&fit=crop",
-      priceEgp: 28000,
-      priceEuro: 820,
-      totalBookings: 54,
-      totalTickets: 108,
-    },
-    {
-      id: "t2",
-      name: "Mountain Trek",
-      image:
-        "https://images.unsplash.com/photo-1491553895911-0055eca6402d?q=80&w=1400&auto=format&fit=crop",
-      priceEgp: 42000,
-      priceEuro: 1230,
-      totalBookings: 31,
-      totalTickets: 62,
-    },
-  ]);
-
-  const totals = trips.reduce(
-    (acc, t) => {
-      acc.bookings += t.totalBookings;
-      acc.tickets += t.totalTickets;
-      acc.revEgp += t.totalBookings * t.priceEgp;
-      acc.revEuro += t.totalBookings * t.priceEuro;
-      return acc;
-    },
-    { bookings: 0, tickets: 0, revEgp: 0, revEuro: 0 }
-  );
-
-  const fmt = (n) => new Intl.NumberFormat().format(n);
-
-  const Stat = ({ label, value, sub }) => (
-    <div className="flex-1 min-w-[180px] rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4">
-      <div className="flex items-center gap-3">
-        <div className="h-10 w-10 rounded-full grid place-items-center border border-zinc-700 bg-zinc-900">📊</div>
-        <div>
-          <div className="text-lg font-semibold text-zinc-100">{value}</div>
-          <div className="text-xs text-zinc-400">{label}</div>
-        </div>
-      </div>
-      {sub && <div className="mt-2 text-xs text-zinc-500">{sub}</div>}
-    </div>
-  );
-
-  const Row = ({ t }) => (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 backdrop-blur p-4 sm:p-5 shadow-sm">
-      <div className="grid grid-cols-1 sm:grid-cols-[220px_1fr] gap-4 items-center">
-        <div className="overflow-hidden rounded-xl border border-zinc-800 aspect-[16/10] sm:aspect-[3/2]">
-          {t.image ? (
-            <img src={t.image} alt={t.name} className="h-full w-full object-cover" />
-          ) : (
-            <div className="h-full w-full grid place-items-center text-zinc-500">image</div>
+          {filteredSorted.length === 0 && (
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-8 text-center text-zinc-400">
+              No results. Try a different search or sort.
+            </div>
           )}
         </div>
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div className="space-y-1">
-            <h3 className="text-lg font-semibold text-zinc-100">{t.name}</h3>
-            <div className="flex flex-wrap gap-2">
-              <Pill variant="muted">price (EGP): {fmt(t.priceEgp)}</Pill>
-              <Pill variant="muted">price (EURO): {fmt(t.priceEuro)}</Pill>
-            </div>
-            <div className="text-sm text-zinc-400">total booking: {fmt(t.totalBookings)}</div>
-            <div className="text-sm text-zinc-400">total tickets: {fmt(t.totalTickets)}</div>
-          </div>
-          <div className="space-y-2 sm:justify-self-end sm:text-right">
-            <div className="text-sm text-zinc-400">rev =&gt; EGP</div>
-            <div className="text-xl font-semibold">{fmt(t.totalBookings * t.priceEgp)}</div>
-            <div className="text-sm text-zinc-400 mt-2">rev =&gt; EURO</div>
-            <div className="text-xl font-semibold">{fmt(t.totalBookings * t.priceEuro)}</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
-      {/* Top bar */}
-      <header className="sticky top-0 z-30 border-b border-zinc-800 bg-zinc-950/70 backdrop-blur">
-        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-full grid place-items-center border border-zinc-700 bg-zinc-900">⚙️</div>
-            <div className="text-xs leading-tight text-zinc-300">
-              <div className="font-semibold">Admin</div>
-              <div className="text-zinc-500">Name</div>
-            </div>
-          </div>
-
-          <nav className="flex items-center gap-2">
-            {[
-              { label: "Control Trips", active: false },
-              { label: "Advanced Infos", active: true },
-              { label: "Bookings", active: false },
-              { label: "Users", active: false },
-            ].map((tab) => (
-              <button
-                key={tab.label}
-                className={`px-3 py-1.5 rounded-lg border text-sm transition-colors whitespace-nowrap ${
-                  tab.active
-                    ? "border-orange-700 bg-orange-900/40 text-orange-200"
-                    : "border-zinc-800 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-900"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </nav>
-        </div>
-      </header>
-
-      {/* Body */}
-      <main className="max-w-6xl mx-auto px-4 py-6 sm:py-8 space-y-5">
-        <h1 className="text-lg sm:text-xl font-semibold">Advanced Infos</h1>
-
-        {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <Stat label="total booking" value={fmt(totals.bookings)} />
-          <Stat label="total tickets" value={fmt(totals.tickets)} />
-          <Stat label="booking revenue / EGP" value={fmt(totals.revEgp)} />
-          <Stat label="booking revenue / EURO" value={fmt(totals.revEuro)} />
-        </div>
-
-        {/* Rows */}
-        <div className="space-y-4">
-          {trips.map((t) => (
-            <Row key={t.id} t={t} />
-          ))}
-        </div>
       </main>
 
-      {/* Page frame */}
+      {/* frame */}
       <div className="pointer-events-none fixed inset-4 rounded-3xl border border-zinc-800/80" />
     </div>
   );
 }
-
