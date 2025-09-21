@@ -86,7 +86,9 @@ function TripCard({ trip, onToggle, onUpdate, onDelete }) {
             {trip.isActive ? "● Is Active" : "○ Inactive"}
           </button>
           <button className="px-3 py-1.5 rounded-lg border border-sky-700 bg-sky-900/30 text-sky-200 text-xs font-medium hover:bg-sky-900/40">
+          <Link href={`/dashboard/controlTrips/${trip._id}`}>
             Update
+          </Link>
           </button>
           <button className="px-3 py-1.5 rounded-lg border border-rose-700 bg-rose-900/30 text-rose-200 text-xs font-medium hover:bg-rose-900/40">
             Delete
