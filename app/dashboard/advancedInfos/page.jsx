@@ -225,26 +225,6 @@ export default function AdvancedInfosPage() {
     dispatch(getTotalBookingsAndRevenue(TOTALS_URL));
   }, [dispatch]);
 
-  // const filteredSorted = useMemo(() => {
-  //   const q = query.trim().toLowerCase();
-  //   let list = (advancedInfo || []).filter((t) =>
-  //     (t.tripName || "").toLowerCase().includes(q)
-  //   );
-
-  //   list.sort((a, b) => {
-  //     if (sortBy === "name")
-  //       return (a.tripName || "").localeCompare(b.tripName || "");
-  //     if (sortBy === "bookings")
-  //       return (b.totalBookings || 0) - (a.totalBookings || 0);
-  //     // revenue
-  //     const ra = currency === "EGP" ? a.totalEgp || 0 : a.totalEuro || 0;
-  //     const rb = currency === "EGP" ? b.totalEgp || 0 : b.totalEuro || 0;
-  //     return rb - ra;
-  //   });
-
-  //   return list;
-  // }, [advancedInfo, query, sortBy, currency]);
-
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
       <main className="max-w-6xl mx-auto px-4 py-6 sm:py-8 space-y-6">
