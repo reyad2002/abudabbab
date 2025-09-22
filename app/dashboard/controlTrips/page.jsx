@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteTrip, fetchTripsData, clearError } from "@/app/store/tripsSlices";
+import { deleteTrip, fetchTripsData, clearError } from "../../../lib/apis/tripsApi";
 import Link from "next/link";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";

@@ -1,6 +1,6 @@
 "use client";
 
-import { postTrip } from "@/app/store/tripsSlices";
+import { postTrip } from "../../../../lib/apis/tripsApi";
 import Link from "next/link";
 import React from "react";
 import { useForm, useFieldArray } from "react-hook-form";

@@ -18,7 +18,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   getAdvancedTripInfo,
   getTotalBookingsAndRevenue,
-} from "@/app/store/bookingSlice";
+} from "../../../lib/apis/bookingsApi";
 
 const ADVANCED_URL =
   "https://abudabbba-backend.vercel.app/api/bookings/advancedTripsInfos/admin";

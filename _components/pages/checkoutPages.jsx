@@ -12,11 +12,12 @@ import {
   FiUsers,
 } from "react-icons/fi";
 import {
-  postBooking,
+  
   setUserInfo,
   setTripId,
-  clearBookingState,
+  
 } from "../../app/store/bookingSlice";
+import {postBooking,clearBookingState } from '../../lib/apis/bookingsApi'
 import Link from "next/link";
 import { IoIosArrowForward } from "react-icons/io";
 

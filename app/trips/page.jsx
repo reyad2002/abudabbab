@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchTripsData } from "../store/tripsSlices"; // استيراد الـ action
+import { fetchTripsData } from "../../lib/apis/tripsApi"; // استيراد الـ action
 import { setTripId } from "../store/bookingSlice";
 
 const container = {

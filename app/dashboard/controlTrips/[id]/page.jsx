@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useRouter } from "next/navigation";
-import { postTrip, updateTrip, fetchTripsData } from "@/app/store/tripsSlices";
+import { postTrip, updateTrip, fetchTripsData } from "../../../../lib/apis/tripsApi";
 
 const API_BASE = "https://abudabbba-backend.vercel.app/api/trips/admin";
 // const API_ADMIN = `${API_BASE}/admin`;
