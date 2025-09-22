@@ -1,6 +1,7 @@
+// // app/dashboard/advanced-infos/page.jsx
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   BarChart3,
@@ -13,34 +14,17 @@ import {
   RefreshCcw,
   Plus,
 } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getAdvancedTripInfo,
+  getTotalBookingsAndRevenue,
+} from "@/app/store/bookingSlice";
 
-/* ---------------------------------- Data ---------------------------------- */
-const initialTrips = [
-  {
-    id: "t1",
-    name: "Island Escape",
-    price: { egp: 28000, eur: 820 }, // سعر التذكرة الواحدة (مثال)
-    totalBooking: 120,
-    totalTickets: 240,
-    revenueEGP: 450000,
-    revenueEUR: 22000,
-    image:
-      "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?q=80&w=1400&auto=format&fit=crop",
-  },
-  {
-    id: "t2",
-    name: "Mountain Trek",
-    price: { egp: 42000, eur: 1180 },
-    totalBooking: 80,
-    totalTickets: 160,
-    revenueEGP: 300000,
-    revenueEUR: 15000,
-    image:
-      "https://images.unsplash.com/photo-1491553895911-0055eca6402d?q=80&w=1400&auto=format&fit=crop",
-  },
-];
+const ADVANCED_URL =
+  "https://abudabbba-backend.vercel.app/api/bookings/advancedTripsInfos/admin";
+const TOTALS_URL =
+  "https://abudabbba-backend.vercel.app/api/bookings/getTotalBookingsAndRevenue/admin";
 
-/* --------------------------------- Helpers -------------------------------- */
 const fmt = (n) => new Intl.NumberFormat().format(n);
 
 function Pill({ children, variant = "default", className = "" }) {
@@ -51,10 +35,13 @@ function Pill({ children, variant = "default", className = "" }) {
     success: "border-emerald-700 bg-emerald-900/30 text-emerald-300",
     muted: "border-zinc-700 bg-zinc-900/40 text-zinc-400",
   };
-  return <span className={`${base} ${variants[variant]} ${className}`}>{children}</span>;
+  return (
+    <span className={`${base} ${variants[variant]} ${className}`}>
+      {children}
+    </span>
+  );
 }
 
-/* --------------------------------- Widgets -------------------------------- */
 function StatCard({ icon: Icon, label, value, sub }) {
   return (
     <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4 sm:p-5 shadow-sm">
@@ -64,7 +51,7 @@ function StatCard({ icon: Icon, label, value, sub }) {
         </div>
         <div>
           <div className="text-xl font-semibold text-zinc-100 leading-tight">
-            {value}
+            {value ?? "—"}
           </div>
           <div className="text-xs text-zinc-400">{label}</div>
         </div>
@@ -85,7 +72,6 @@ function Toolbar({
 }) {
   return (
     <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-3 sm:p-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      {/* left */}
       <div className="flex items-center gap-2">
         <div className="relative">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-zinc-500" />
@@ -96,7 +82,6 @@ function Toolbar({
             className="pl-9 pr-3 py-2 w-64 rounded-lg border border-zinc-800 bg-zinc-950/60 text-sm outline-none focus:ring-2 focus:ring-zinc-700/50"
           />
         </div>
-
         <button
           onClick={onRefresh}
           className="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-zinc-700 bg-zinc-900/60 hover:bg-zinc-900 text-sm"
@@ -106,7 +91,6 @@ function Toolbar({
         </button>
       </div>
 
-      {/* right */}
       <div className="flex items-center gap-2">
         <div className="hidden sm:flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-950/60 p-1">
           <button
@@ -140,7 +124,6 @@ function Toolbar({
           >
             <option value="revenue">Sort: Revenue</option>
             <option value="bookings">Sort: Bookings</option>
-            <option value="tickets">Sort: Tickets</option>
             <option value="name">Sort: Name</option>
           </select>
         </div>
@@ -158,16 +141,17 @@ function Toolbar({
 }
 
 function TripRow({ t, currency = "EGP" }) {
-  const revenue =
-    currency === "EGP" ? t.revenueEGP : t.revenueEUR;
-
+  const revenue = currency === "EGP" ? t.totalEgp : t.totalEuro;
   return (
     <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 backdrop-blur p-4 sm:p-5 shadow-sm">
       <div className="grid grid-cols-1 sm:grid-cols-[220px_1fr_auto] gap-4 items-center">
-        {/* image */}
         <div className="overflow-hidden rounded-xl border border-zinc-800 aspect-[16/10] sm:aspect-[3/2]">
-          {t.image ? (
-            <img src={t.image} alt={t.name} className="h-full w-full object-cover" />
+          {t.coverImage ? (
+            <img
+              src={t.coverImage}
+              alt={t.tripName}
+              className="h-full w-full object-cover"
+            />
           ) : (
             <div className="h-full w-full grid place-items-center text-zinc-500">
               image
@@ -175,33 +159,34 @@ function TripRow({ t, currency = "EGP" }) {
           )}
         </div>
 
-        {/* content */}
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-lg font-semibold text-zinc-100">{t.name}</h3>
-            <Pill variant="muted">
-              price: {fmt(t.price.egp)} EGP / {fmt(t.price.eur)} €
-            </Pill>
+            <h3 className="text-lg font-semibold text-zinc-100">
+              {t.tripName}
+            </h3>
+            <Pill>bookings: {fmt(t.totalBookings)}</Pill>
           </div>
-
-          <div className="flex flex-wrap gap-2">
-            <Pill>bookings: {fmt(t.totalBooking)}</Pill>
-            <Pill>tickets: {fmt(t.totalTickets)}</Pill>
-          </div>
-
           <div className="text-sm text-zinc-400">
             <Calendar className="inline-block h-4 w-4 mr-1 align-[-2px]" />
-            last 30 days (sample)
+            aggregated lifetime stats
           </div>
         </div>
 
-        {/* right */}
         <div className="sm:text-right">
-          <div className="text-xs text-zinc-400">revenue ({currency})</div>
-          <div className="text-xl font-semibold">{fmt(revenue)}</div>
+          <div className="flex gap-3">
+            <div className="px-5 py-1 bg-[#181818] rounded-2xl border-2 border-[#232323] flex flex-col justify-center items-center">
+              <div className="text-xs text-zinc-400">revenue EGP:</div>
+              <div className="text-xl font-semibold">{t.totalEgp} .LE</div>
+            </div>
+            <div className="px-5 py-1 bg-[#181818] rounded-2xl border-2 border-[#232323] flex flex-col justify-center items-center">
+              <div className="text-xs text-zinc-400">revenue Euro:</div>
+              <div className="text-xl font-semibold">{t.totalEuro} $</div>
+            </div>
+          </div>
+
           <div className="mt-3 flex gap-2 sm:justify-end">
             <Link
-              href={`/dashboard/controlTrips/${t.id}`}
+              href={`/dashboard/controlTrips/${t.tripId}`}
               className="px-3 py-1.5 rounded-lg border border-sky-700 bg-sky-900/30 text-sky-200 text-xs font-medium hover:bg-sky-900/40"
             >
               Manage
@@ -219,46 +204,50 @@ function TripRow({ t, currency = "EGP" }) {
   );
 }
 
-/* --------------------------------- Page ----------------------------------- */
-export default function AdvancedInfos() {
-  const [trips] = useState(initialTrips);
+export default function AdvancedInfosPage() {
+  const dispatch = useDispatch();
+
+  const {
+    advancedInfo,
+    advancedLoading,
+    advancedError,
+    totals,
+    totalsLoading,
+    totalsError,
+  } = useSelector((s) => s.bookings); // ✅ خُد بالك: state.bookings
+  console.log(advancedInfo);
   const [query, setQuery] = useState("");
-  const [currency, setCurrency] = useState("EGP"); // 'EGP' | 'EUR'
+  const [currency, setCurrency] = useState("EGP");
   const [sortBy, setSortBy] = useState("revenue");
 
-  const filteredSorted = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    let list = trips.filter((t) => t.name.toLowerCase().includes(q));
+  useEffect(() => {
+    dispatch(getAdvancedTripInfo(ADVANCED_URL));
+    dispatch(getTotalBookingsAndRevenue(TOTALS_URL));
+  }, [dispatch]);
 
-    list.sort((a, b) => {
-      if (sortBy === "name") return a.name.localeCompare(b.name);
-      if (sortBy === "bookings") return b.totalBooking - a.totalBooking;
-      if (sortBy === "tickets") return b.totalTickets - a.totalTickets;
-      // revenue
-      const ra = currency === "EGP" ? a.revenueEGP : a.revenueEUR;
-      const rb = currency === "EGP" ? b.revenueEGP : b.revenueEUR;
-      return rb - ra;
-    });
-    return list;
-  }, [trips, query, sortBy, currency]);
+  // const filteredSorted = useMemo(() => {
+  //   const q = query.trim().toLowerCase();
+  //   let list = (advancedInfo || []).filter((t) =>
+  //     (t.tripName || "").toLowerCase().includes(q)
+  //   );
 
-  const totals = useMemo(() => {
-    return filteredSorted.reduce(
-      (acc, t) => {
-        acc.booking += t.totalBooking;
-        acc.tickets += t.totalTickets;
-        acc.egp += t.revenueEGP;
-        acc.eur += t.revenueEUR;
-        return acc;
-      },
-      { booking: 0, tickets: 0, egp: 0, eur: 0 }
-    );
-  }, [filteredSorted]);
+  //   list.sort((a, b) => {
+  //     if (sortBy === "name")
+  //       return (a.tripName || "").localeCompare(b.tripName || "");
+  //     if (sortBy === "bookings")
+  //       return (b.totalBookings || 0) - (a.totalBookings || 0);
+  //     // revenue
+  //     const ra = currency === "EGP" ? a.totalEgp || 0 : a.totalEuro || 0;
+  //     const rb = currency === "EGP" ? b.totalEgp || 0 : b.totalEuro || 0;
+  //     return rb - ra;
+  //   });
+
+  //   return list;
+  // }, [advancedInfo, query, sortBy, currency]);
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
       <main className="max-w-6xl mx-auto px-4 py-6 sm:py-8 space-y-6">
-        {/* top header actions */}
         <div className="flex items-center justify-between">
           <h1 className="text-lg sm:text-xl font-semibold">Advanced Infos</h1>
           <Link
@@ -270,24 +259,33 @@ export default function AdvancedInfos() {
         </div>
 
         {/* KPIs */}
+        {totalsLoading && <div className="loader"></div>}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <StatCard icon={BarChart3} label="Total Booking" value={fmt(totals.booking)} />
-          <StatCard icon={Ticket} label="Total Tickets" value={fmt(totals.tickets)} />
+          <StatCard
+            icon={BarChart3}
+            label="Total Booking"
+            value={fmt(totals?.totalBookings ?? 0)}
+          />
+          <StatCard
+            icon={Ticket}
+            label="Total Tickets"
+            value={fmt(totals?.totalTickets ?? 0)}
+          />
           <StatCard
             icon={DollarSign}
             label="Revenue EGP"
-            value={fmt(totals.egp)}
+            value={fmt(totals?.totalEgp ?? 0)}
             sub="All-time gross revenue (EGP)"
           />
           <StatCard
             icon={Euro}
             label="Revenue EUR"
-            value={fmt(totals.eur)}
+            value={fmt(totals?.totalEuro ?? 0)}
             sub="All-time gross revenue (EUR)"
           />
         </div>
 
-        {/* toolbar */}
+        {/* Toolbar */}
         <Toolbar
           query={query}
           setQuery={setQuery}
@@ -295,23 +293,43 @@ export default function AdvancedInfos() {
           setCurrency={setCurrency}
           sortBy={sortBy}
           setSortBy={setSortBy}
-          onRefresh={() => window.location.reload()}
+          onRefresh={() => {
+            dispatch(getAdvancedTripInfo(ADVANCED_URL));
+            dispatch(getTotalBookingsAndRevenue(TOTALS_URL));
+          }}
         />
 
-        {/* list */}
-        <div className="space-y-4">
-          {filteredSorted.map((t) => (
-            <TripRow key={t.id} t={t} currency={currency} />
-          ))}
-          {filteredSorted.length === 0 && (
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-8 text-center text-zinc-400">
-              No results. Try a different search or sort.
-            </div>
-          )}
-        </div>
+        {/* List */}
+        {advancedLoading ? (
+          <div className="loader"></div>
+        ) : advancedInfo?.length && (
+          advancedInfo.map((t) => (
+            <TripRow
+              key={t.tripId ?? t._id ?? t.tripName}
+              t={t}
+              currency={currency}
+            />
+          ))
+        ) }
+
+        {/* {!advancedLoading && !advancedError && (
+          <div className="space-y-4">
+            {filteredSorted.map((t) => (
+              <TripRow
+                key={t.tripId || t._id || t.tripName}
+                t={t}
+                currency={currency}
+              />
+            ))}
+            {filteredSorted.length === 0 && (
+              <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-8 text-center text-zinc-400">
+                No results. Try a different search or sort.
+              </div>
+            )}
+          </div>
+        )} */}
       </main>
 
-      {/* frame */}
       <div className="pointer-events-none fixed inset-4 rounded-3xl border border-zinc-800/80" />
     </div>
   );
