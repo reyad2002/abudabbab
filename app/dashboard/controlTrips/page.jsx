@@ -12,12 +12,12 @@ const API_LIST  = "https://abudabbba-backend.vercel.app/api/trips";
 /* ---------- UI ---------- */
 function Pill({ children, variant = "default", className = "", ...rest }) {
   const base =
-    "inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full border";
+    "inline-flex items-center gap-1 px-4 py-2 text-xs rounded-full border";
   const variants = {
     default: "border-zinc-700 bg-zinc-800 text-zinc-200",
     success: "border-emerald-700 bg-emerald-900/30 text-emerald-300",
     danger:  "border-rose-700 bg-rose-900/30 text-rose-300",
-    muted:   "border-zinc-700 bg-zinc-900/40 text-zinc-400",
+    muted:   "border-zinc-700 bg-zinc-900/40 text-zinc-400 ",
   };
   return (
     <span className={`${base} ${variants[variant]} ${className}`} {...rest}>
