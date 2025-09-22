@@ -7,8 +7,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { useParams, useRouter } from "next/navigation";
 import { postTrip, updateTrip, fetchTripsData } from "../../../../lib/apis/tripsApi";
 
-const API_BASE = "https://abudabbba-backend.vercel.app/api/trips/admin";
-// const API_ADMIN = `${API_BASE}/admin`;
+const API_BASE = "https://abudabbba-backend.vercel.app/api/trips";
+const API_ADMIN = `${API_BASE}/admin`;
 
 export default function AddTripPageRHF() {
   const { id } = useParams();                  // لو فيه id → تعديل
@@ -104,10 +104,10 @@ export default function AddTripPageRHF() {
 
     try {
       if (isEdit) {
-        await dispatch(updateTrip({ url: API_BASE, id, tripData: payload })).unwrap();
+        await dispatch(updateTrip({ url: API_ADMIN, id, tripData: payload })).unwrap();
         setBanner({ type: "success", text: "Trip updated ✅" });
       } else {
-        await dispatch(postTrip({ url: API_BASE, tripData: payload })).unwrap();
+        await dispatch(postTrip({ url: API_ADMIN, tripData: payload })).unwrap();
         setBanner({ type: "success", text: "Trip created ✅" });
       }
       reset();

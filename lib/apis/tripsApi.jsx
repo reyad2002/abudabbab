@@ -20,9 +20,20 @@ export const fetchTripsData = createAsyncThunk(
   export const updateTrip = createAsyncThunk(
     "trips/updateTrip",
     async ({ url, id, tripData }) => {
-      const fullUrl = `${url}/${id}`;
-      const response = await axios.put(fullUrl, tripData); // always PUT
-      return response.data.data; // assuming API returns updated trip
+      try {
+        const fullUrl = `${url}/${id}`;
+        const response = await axios.put(fullUrl, tripData); // always PUT
+        const updated =
+        response.data?.data ??
+        response.data?.trip ??
+        response.data?.result ??
+        response.data;
+        return updated;
+      } catch (error) {
+        const msg = error.response?.data?.message || error.message || "Update failed";
+        return rejectWithValue(msg);
+      }
+   
     }
   );
   // delete trip
