@@ -42,11 +42,11 @@ export default function CheckoutSection() {
     reset,
   } = useForm();
 
-  //   useEffect(() => {
-  //     return()=>{
-  //        dispatch( clearBookingState())
-  //     }
-  //   }, [dispatch]);
+    // useEffect(() => {
+    //   return()=>{
+    //      dispatch( clearBookingState())
+    //   }
+    // }, [dispatch]);
 
   // ---- Submit: save user info, then post booking ----
   const onSubmit = async (data) => {

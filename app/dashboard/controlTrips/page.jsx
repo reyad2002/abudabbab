@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteTrip, fetchTripsData } from "@/app/store/tripsSlices";
+import { deleteTrip, fetchTripsData, clearError } from "@/app/store/tripsSlices";
 import Link from "next/link";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -102,7 +102,7 @@ function TripCard({ trip, onDelete }) {
 /* ---------- Page ---------- */
 export default function DashboardTrips() {
   const dispatch = useDispatch();
-  const { trips, loading } = useSelector((state) => state.trips);
+  const { trips, loading, error } = useSelector((state) => state.trips);
 
   // fetch once
   useEffect(() => {
@@ -115,8 +115,15 @@ export default function DashboardTrips() {
     try {
       await dispatch(deleteTrip({ url: API_ADMIN, id })).unwrap();
     } catch (e) {
-      alert(e?.message || "Delete failed");
+      const errorMessage = e?.message || e?.payload?.message || "Delete failed";
+      alert(`Error: ${errorMessage}`);
     }
+  };
+
+  // retry function
+  const handleRetry = () => {
+    dispatch(clearError());
+    dispatch(fetchTripsData(API_LIST));
   };
 
   return (
@@ -137,16 +144,39 @@ export default function DashboardTrips() {
           </div>
         </div>
 
-        {/* Empty / loading */}
-        {!loading && trips.length === 0 && (
+        {/* Loading */}
+        {loading && (
           <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-8 text-center text-zinc-400">
-            {/* No trips yet. Click <span className="text-zinc-200 font-medium">ADD</span> to create one. */}
-            {!loading && <div className="loader"></div>}
+            <div className="loader"></div>
+            Loading trips...
+          </div>
+        )}
+
+        {/* Error */}
+        {error && (
+          <div className="rounded-2xl border border-rose-800 bg-rose-900/40 p-6 text-center">
+            <div className="flex flex-col items-center gap-4">
+              <div className="text-rose-300 font-medium">Error Loading Trips</div>
+              <p className="text-rose-200 text-sm">{error}</p>
+              <button
+                onClick={handleRetry}
+                className="px-4 py-2 rounded-lg border border-rose-700 bg-rose-900/60 hover:bg-rose-900/80 text-rose-200 text-sm font-medium"
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Empty state */}
+        {!loading && !error && trips.length === 0 && (
+          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-8 text-center text-zinc-400">
+            No trips yet. Click <span className="text-zinc-200 font-medium">ADD</span> to create one.
           </div>
         )}
 
         {/* List */}
-        {trips.map((trip) => (
+        {!loading && !error && trips.map((trip) => (
           <TripCard key={trip._id} trip={trip} onDelete={handleDelete} />
         ))}
       </main>

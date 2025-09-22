@@ -161,7 +161,7 @@ export default function AddTripPageRHF() {
                 const url = imagesWatch?.[i]?.url || "";
                 return (
                   <div key={row.id} className="flex items-center gap-2">
-                    {/* <div className="h-12 w-16 overflow-hidden rounded border border-zinc-800 bg-zinc-900 grid place-items-center shrink-0">
+                    <div className="h-12 w-16 overflow-hidden rounded border border-zinc-800 bg-zinc-900 grid place-items-center shrink-0">
                       {url ? (
                         <img
                           src={url}
@@ -176,7 +176,7 @@ export default function AddTripPageRHF() {
                           preview
                         </span>
                       )}
-                    </div> */}
+                    </div>
 
                     <input
                       className={inputCls(

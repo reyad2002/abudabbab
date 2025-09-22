@@ -40,10 +40,22 @@ export const deleteTrip = createAsyncThunk(
   }
 );
 
+// GET advanced trips infos
+export const fetchAdvancedTripsInfos = createAsyncThunk(
+  "trips/fetchAdvancedTripsInfos",
+  async (url) => {
+    const response = await axios.get(url);
+    return response.data.data;
+  }
+);
+
 const initialState = {
   trips: [],
+  advancedTripsInfos: [],
   loading: false,
+  advancedLoading: false,
   error: null,
+  advancedError: null,
 };
 
 const tripsSlice = createSlice({
@@ -113,6 +125,20 @@ const tripsSlice = createSlice({
       .addCase(deleteTrip.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
+      })
+
+      // GET advanced trips infos
+      .addCase(fetchAdvancedTripsInfos.pending, (state) => {
+        state.advancedLoading = true;
+        state.advancedError = null;
+      })
+      .addCase(fetchAdvancedTripsInfos.fulfilled, (state, action) => {
+        state.advancedLoading = false;
+        state.advancedTripsInfos = action.payload;
+      })
+      .addCase(fetchAdvancedTripsInfos.rejected, (state, action) => {
+        state.advancedLoading = false;
+        state.advancedError = action.error.message;
       });
   },
 });
