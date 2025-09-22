@@ -16,28 +16,41 @@ const AdminHeader = () => {
 
   return (
     <header className="sticky top-0 z-30 border-b border-zinc-800 bg-zinc-950/95 backdrop-blur">
-      <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
+        {/* left: admin */}
+        <div className="flex items-center gap-3 min-w-0">
           <div className="h-8 w-8 rounded-full grid place-items-center border border-zinc-700 bg-zinc-900">
             ⚙️
           </div>
-          <div className="text-xs leading-tight text-zinc-300">
+          {/* اخفي الاسم على الشاشات الصغيرة */}
+          <div className="hidden sm:block text-xs leading-tight text-zinc-300">
             <div className="font-semibold">Admin</div>
             <div className="text-zinc-500">Name</div>
           </div>
         </div>
 
-        <nav className="flex items-center gap-2">
+        {/* right: tabs */}
+        <nav
+          className="
+            flex items-center gap-1 sm:gap-2
+            overflow-x-auto max-w-full
+            [-ms-overflow-style:none] [scrollbar-width:none]
+          "
+          // لإخفاء شريط التمرير في كروم وسفاري لو حابب (اختياري)
+          style={{ WebkitOverflowScrolling: "touch" }}
+        >
           {tabs.map((tab) => {
-            const isActive = pathname === tab.path; // if the current pathname === tab.path 
+            const isActive = pathname === tab.path;
             return (
-              <Link key={tab.label} href={tab.path}>
+              <Link key={tab.label} href={tab.path} className="shrink-0">
                 <button
-                  className={`cursor-pointer px-3 py-1.5 rounded-lg border text-sm transition-colors whitespace-nowrap ${
-                    isActive
-                      ? "border-orange-700 bg-orange-900/40 text-orange-200"
-                      : "border-zinc-800 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-900" //change the color
-                  }`}
+                  aria-current={isActive ? "page" : undefined}
+                  className={`cursor-pointer px-2.5 sm:px-3 py-1.5 rounded-lg border text-xs sm:text-sm transition-colors whitespace-nowrap shrink-0
+                    ${
+                      isActive
+                        ? "border-orange-700 bg-orange-900/40 text-orange-200"
+                        : "border-zinc-800 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-900"
+                    }`}
                 >
                   {tab.label}
                 </button>
