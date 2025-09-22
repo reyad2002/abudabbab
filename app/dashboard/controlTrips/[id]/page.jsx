@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useParams, useRouter } from "next/navigation";
 import { postTrip, updateTrip, fetchTripsData } from "@/app/store/tripsSlices";
 
-const API_BASE = "https://abudabbba-backend.vercel.app/api/trips/admin/";
+const API_BASE = "https://abudabbba-backend.vercel.app/api/trips/admin";
 // const API_ADMIN = `${API_BASE}/admin`;
 
 export default function AddTripPageRHF() {
