@@ -18,6 +18,7 @@ import {
   getAdvancedTripInfo,
   getTotalBookingsAndRevenue,
 } from "../../../lib/apis/bookingsApi";
+import moment from "moment";
 
 const ADVANCED_URL =
   "https://abudabbba-backend.vercel.app/api/bookings/advancedTripsInfos/admin";
@@ -41,7 +42,7 @@ function Pill({ children, variant = "default", className = "" }) {
   );
 }
 
-function StatCard({ icon: Icon, label, value, sub }) {
+function StatCard({ icon: Icon, label, value, sub , className}) {
   return (
     <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4 sm:p-5 shadow-sm">
       <div className="flex items-center gap-3">
@@ -163,27 +164,40 @@ function TripRow({ t, currency = "EGP" }) {
             <h3 className="text-lg font-semibold text-zinc-100">
               {t.tripName}
             </h3>
-            <Pill>bookings: {fmt(t.totalBookings)}</Pill>
+            <Pill>Bookings: {fmt(t.totalBookings)}</Pill>
+            <Pill>Tickets: {fmt(t.totalTickets)}</Pill>
           </div>
-          <div className="text-sm text-zinc-400">
+          <div className="text-sm text-zinc-300">
             <Calendar className="inline-block h-4 w-4 mr-1 align-[-2px]" />
-            aggregated lifetime stats
+            Created At :{" "}
+            <span className="text-teal-400">
+              {moment(t.createdAt).format("DD/MM/YYYY HH:mm:ss")}
+            </span>
+          </div>
+          <div className="text-sm text-zinc-300">
+            <Calendar className="inline-block h-4 w-4 mr-1 align-[-2px]" />
+            Last Update At :{" "}
+            <span className="text-teal-400">
+              {moment(t.updatedAt).format("DD/MM/YYYY HH:mm:ss")}
+            </span>
           </div>
         </div>
 
-        <div className="sm:text-right">
-          <div className="flex gap-3">
-            <div className="px-5 py-1 bg-[#181818] rounded-2xl border-2 border-[#232323] flex flex-col justify-center items-center">
-              <div className="text-xs text-zinc-400">revenue EGP:</div>
-              <div className="text-xl font-semibold">{t.totalEgp} .LE</div>
+        <div className="sm:text-right flex flex-col gap-3">
+          <div className="px-5 py-1 bg-[#181818] rounded-2xl border-2 border-[#232323] flex flex-col justify-center items-center">
+            <div className="text-xs text-zinc-400">revenue EGP:</div>
+            <div className="text-lg font-semibold text-emerald-400">
+              {t.totalEgp} .LE
             </div>
-            <div className="px-5 py-1 bg-[#181818] rounded-2xl border-2 border-[#232323] flex flex-col justify-center items-center">
-              <div className="text-xs text-zinc-400">revenue Euro:</div>
-              <div className="text-xl font-semibold">{t.totalEuro} $</div>
+          </div>
+          <div className="px-5 py-1 bg-[#181818] rounded-2xl border-2 border-[#232323] flex flex-col justify-center items-center">
+            <div className="text-xs text-zinc-400">revenue Euro:</div>
+            <div className="text-lg font-semibold text-amber-400">
+              {t.totalEuro} $
             </div>
           </div>
 
-          <div className="mt-3 flex gap-2 sm:justify-end">
+          <div className=" flex gap-2 sm:justify-end">
             <Link
               href={`/dashboard/controlTrips/${t.tripId}`}
               className="px-3 py-1.5 rounded-lg border border-sky-700 bg-sky-900/30 text-sky-200 text-xs font-medium hover:bg-sky-900/40"
