@@ -224,7 +224,7 @@ export default function UsersPage() {
               </thead>
               <tbody>
                 {allUsers?.length === 0 ? (
-                  <tr>
+                  <tr >
                     <td
                       colSpan={6}
                       className="p-6 text-center text-neutral-400"

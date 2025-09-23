@@ -86,16 +86,19 @@ export default function BookingsPage() {
   const pageSize = 5;
  
   const [allBookings, setAllBookings] = useState([]);
+  const [totalBookingss, setTotalBookingss] = useState([]);
   useEffect(() => {
     const fetchBookings = async () => {
       const response = await axios.get(
-        "https://abudabbba-backend.vercel.app/api/bookings/admin"
+        "https://abudabbba-backend.vercel.app/api/bookings/admin?limit=100"
       );
       setAllBookings(response.data.bookings); // Save the data to state
+      setTotalBookingss(response.data.totalBookings); // Save the data to state
     };
     fetchBookings();
   }, []);
-  console.log(allBookings);
+  // console.log(allBookings);
+  // console.log(alldata);
 
   const resetToFirst = () => setPage(1);
 
@@ -103,7 +106,7 @@ export default function BookingsPage() {
     <div className="min-h-screen bg-neutral-900 text-neutral-200">
       {/* Content */}
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-lg font-semibold tracking-wide">TOTAL BOOKINGS</h1>
+        <h1 className="text-lg font-semibold tracking-wide">TOTAL BOOKINGS : {totalBookingss}</h1>
 
         {/* Controls */}
         <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
