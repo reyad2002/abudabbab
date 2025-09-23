@@ -63,7 +63,6 @@ function StatCard({ icon: Icon, label, value, sub }) {
 function Toolbar({
   query,
   setQuery,
-
   sortBy,
   setSortBy,
   onRefresh,
@@ -221,10 +220,25 @@ export default function AdvancedInfosPage() {
 
   // search filter for trips
   const handelSearchTrip = useMemo(() => {
-    return advancedInfo.filter((t) =>
+    // تصفية الرحلات بناءً على الاسم (الاستعلام)
+    let filteredTrips = advancedInfo.filter((t) =>
       t.tripName.toLowerCase().includes(query.toLowerCase())
     );
-  }, [query, advancedInfo]);
+
+    // ترتيب الرحلات بناءً على القيمة المختارة في sortBy
+    if (sortBy === "revenue") {
+      // ترتيب حسب الإيرادات (EGP أو EUR)
+      filteredTrips.sort((a, b) => b.totalEgp - a.totalEgp); // الترتيب حسب الإيرادات بالجنيه المصري
+    } else if (sortBy === "bookings") {
+      // ترتيب حسب عدد الرحلات
+      filteredTrips.sort((a, b) => b.totalBookings - a.totalBookings); // الترتيب حسب عدد الرحلات
+    } else if (sortBy === "name") {
+      // ترتيب حسب الاسم الأبجدي
+      filteredTrips.sort((a, b) => a.tripName.localeCompare(b.tripName));
+    }
+
+    return filteredTrips;
+  }, [query, sortBy, advancedInfo]);
 
   useEffect(() => {
     dispatch(getAdvancedTripInfo(ADVANCED_URL));

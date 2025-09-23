@@ -305,16 +305,7 @@ export default function BookingsPage() {
         </div>
       </main>
 
-      {/* Issue pill (bottom-left) */}
-      <button className="fixed left-4 bottom-4 flex items-center gap-2 rounded-full bg-rose-600 px-3 py-2 text-sm font-medium text-white shadow-lg ring-1 ring-rose-300/30 hover:brightness-110">
-        <span className="grid h-6 w-6 place-items-center rounded-full bg-rose-700/50 text-xs">
-          N
-        </span>
-        1 Issue
-        <span className="ml-1 grid h-4 w-4 place-items-center rounded-full bg-rose-700/70 text-[10px]">
-          ×
-        </span>
-      </button>
+      
     </div>
   );
 }
