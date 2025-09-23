@@ -235,7 +235,8 @@ export default function AdvancedInfosPage() {
   // search filter for trips
   const handelSearchTrip = useMemo(() => {
     // تصفية الرحلات بناءً على الاسم (الاستعلام)
-    let filteredTrips = advancedInfo.filter((t) =>
+    const sourceTrips = Array.isArray(advancedInfo) ? advancedInfo : [];
+    let filteredTrips = sourceTrips.filter((t) =>
       t.tripName.toLowerCase().includes(query.toLowerCase())
     );
 

@@ -18,14 +18,39 @@ function loadPersistedBookings() {
 
 const preloadedBookingsState = loadPersistedBookings();
 
+// Minimal safe defaults for the bookings slice to avoid undefined fields
+const defaultBookingsState = {
+  list: {},
+  advancedInfo: [],
+  totals: {
+    totalBookings: '',
+    totalTickets: '',
+    totalEgp: '',
+    totalEuro: '',
+  },
+  tripId: null,
+  trip: null,
+  userInfo: {},
+  bookingDetails: {},
+  loading: false,
+  error: null,
+  advancedLoading: false,
+  advancedError: null,
+  totalsLoading: false,
+  totalsError: null,
+  postLoading: false,
+  postError: null,
+  lastCreatedBooking: null,
+};
+
 const tripsStore = configureStore({
   reducer: {
     trips: tripsReducer,
     bookings: bookingReducer,
   },
-  // Preload the bookings slice if available
+  // Preload the bookings slice if available, merged with safe defaults
   preloadedState: preloadedBookingsState
-    ? { bookings: preloadedBookingsState }
+    ? { bookings: { ...defaultBookingsState, ...preloadedBookingsState } }
     : undefined,
 });
 
