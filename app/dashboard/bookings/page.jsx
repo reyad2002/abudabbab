@@ -73,16 +73,8 @@ const SEED = [
     bookedAt: "2025-06-12",
   },
 ];
-const BOOkING_API = "https://abudabbba-backend.vercel.app/api/bookings/admin";
+
 export default function BookingsPage() {
-  const dispatch = useDispatch();
-  const { list } = useSelector((s) => s.bookings);
-  const bookings = list.bookings;
-  // no need to fetch
-  // useEffect(()=>{
-  //   dispatch(getAllBookings(BOOkING_API))
-  // })
-  // console.log(list.data.bookings);
   const [q, setQ] = useState("");
   const [searchField, setSearchField] = useState("name"); // name | phone | email
   const [transferFilter, setTransferFilter] = useState("all"); // all | yes | no
@@ -173,7 +165,7 @@ export default function BookingsPage() {
                 }}
                 className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-xs text-neutral-300 focus:ring-2 focus:ring-neutral-700"
               >
-                <option value="name">name</option>
+                <option value="name">nname</option>
                 <option value="phone">phone</option>
                 <option value="email">email</option>
               </select>
@@ -237,7 +229,7 @@ export default function BookingsPage() {
                   <Th>Booking date</Th>
                 </tr>
               </thead>
-              <tbody>
+              {/* <tbody>
                 {bookings?.length === 0 ? (
                   <tr>
                     <td
@@ -281,7 +273,7 @@ export default function BookingsPage() {
                     </tr>
                   ))
                 )}
-              </tbody>
+              </tbody> */}
             </table>
           </div>
         </div>
