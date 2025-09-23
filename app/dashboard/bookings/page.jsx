@@ -75,13 +75,16 @@ const SEED = [
 ];
 
 export default function BookingsPage() {
+  const dispatch = useDispatch()
+  const {list} = useSelector((s)=>s.bookings)
   const [q, setQ] = useState("");
   const [searchField, setSearchField] = useState("name"); // name | phone | email
   const [transferFilter, setTransferFilter] = useState("all"); // all | yes | no
   const [sort, setSort] = useState("recent"); // recent | oldest | nameAsc | nameDesc
   const [page, setPage] = useState(1);
   const pageSize = 5;
-
+  console.log(list.bookings)
+  const allBookings = list.bookings
   // const filtered = useMemo(() => {
   //   let rows = [...bookings];
 
@@ -229,8 +232,8 @@ export default function BookingsPage() {
                   <Th>Booking date</Th>
                 </tr>
               </thead>
-              {/* <tbody>
-                {bookings?.length === 0 ? (
+              <tbody>
+                {allBookings?.length === 0 ? (
                   <tr>
                     <td
                       colSpan={8}
@@ -240,7 +243,7 @@ export default function BookingsPage() {
                     </td>
                   </tr>
                 ) : (
-                  bookings?.map((r) => (
+                  allBookings?.map((r) => (
                     <tr
                       key={r._id}
                       className="border-t border-neutral-800 hover:bg-neutral-900/40"
@@ -273,7 +276,7 @@ export default function BookingsPage() {
                     </tr>
                   ))
                 )}
-              </tbody> */}
+              </tbody>
             </table>
           </div>
         </div>
