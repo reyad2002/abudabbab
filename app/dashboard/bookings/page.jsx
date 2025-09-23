@@ -83,8 +83,12 @@ export default function BookingsPage() {
   const [sort, setSort] = useState("recent"); // recent | oldest | nameAsc | nameDesc
   const [page, setPage] = useState(1);
   const pageSize = 5;
-  console.log(list.bookings)
-  const allBookings = list.bookings
+  console.log(list.data.bookings)
+  const allBookings = list.data.bookings
+  // useEffect(() => {
+  //   // طلب البيانات من الـ API عند تحميل المكون
+  //   dispatch(getAllBookings("https://abudabbba-backend.vercel.app/api/bookings/admin"));
+  // }, [dispatch]);
   // const filtered = useMemo(() => {
   //   let rows = [...bookings];
 
