@@ -91,59 +91,14 @@ export default function BookingsPage() {
   //   dispatch(getAllBookings("https://abudabbba-backend.vercel.app/api/bookings/admin"));
   // }, [dispatch]);
   const [allBookings, setAllBookings] = useState([]);
-
-  useEffect(async () => {
-    const response = await axios.get(
-      "https://abudabbba-backend.vercel.app/api/bookings/admin"
-    );
-
-    setAllBookings(response.data.bookings); // Save the data to state
+  useEffect(() => {
+    const fetchBookings = async () => {
+      const response = await axios.get("https://abudabbba-backend.vercel.app/api/bookings/admin");
+      setAllBookings(response.data.bookings); // Save the data to state
+    };
+    fetchBookings();
   }, []);
   console.log(allBookings);
-  // const filtered = useMemo(() => {
-  //   let rows = [...bookings];
-
-  //   // Search
-  //   if (q.trim()) {
-  //     const needle = q.toLowerCase();
-  //     rows = rows.filter((r) => {
-  //       const map = {
-  //         name: r.userName,
-  //         phone: r.phone,
-  //         email: r.email,
-  //       };
-  //       return (map[searchField] || "").toLowerCase().includes(needle);
-  //     });
-  //   }
-
-  //   // Transfer filter
-  //   if (transferFilter !== "all") {
-  //     rows = rows.filter((r) =>
-  //       transferFilter === "yes" ? r.transfer === "Yes" : r.transfer === "No"
-  //     );
-  //   }
-
-  //   // Sort
-  //   rows.sort((a, b) => {
-  //     switch (sort) {
-  //       case "recent":
-  //         return new Date(b.bookedAt) - new Date(a.bookedAt);
-  //       case "oldest":
-  //         return new Date(a.bookedAt) - new Date(b.bookedAt);
-  //       case "nameAsc":
-  //         return a.userName.localeCompare(b.userName);
-  //       case "nameDesc":
-  //         return b.userName.localeCompare(a.userName);
-  //       default:
-  //         return 0;
-  //     }
-  //   });
-
-  //   return rows;
-  // }, [q, searchField, transferFilter, sort]);
-  // console.log(filtered)
-  // const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
-  // const pageRows = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   const resetToFirst = () => setPage(1);
 
@@ -254,7 +209,7 @@ export default function BookingsPage() {
                       colSpan={8}
                       className="p-6 text-center text-neutral-400"
                     >
-                      No results.
+                      No results. <div className="loader"></div>
                     </td>
                   </tr>
                 ) : (
