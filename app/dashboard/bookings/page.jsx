@@ -238,7 +238,7 @@ export default function BookingsPage() {
                 </tr>
               </thead>
               <tbody>
-                {bookings.length === 0 ? (
+                {bookings?.length === 0 ? (
                   <tr>
                     <td
                       colSpan={8}
