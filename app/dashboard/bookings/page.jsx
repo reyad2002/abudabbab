@@ -79,9 +79,9 @@ export default function BookingsPage() {
   const { list } = useSelector((s) => s.bookings);
   const bookings = list?.data?.bookings;
   // no need to fetch
-  useEffect(()=>{
-    dispatch(getAllBookings(BOOkING_API))
-  }, [dispatch])
+  // useEffect(()=>{
+  //   dispatch(getAllBookings(BOOkING_API))
+  // }, [dispatch])
   // console.log(list.data.bookings);
   const [q, setQ] = useState("");
   const [searchField, setSearchField] = useState("name"); // name | phone | email
