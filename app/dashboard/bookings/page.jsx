@@ -248,7 +248,7 @@ export default function BookingsPage() {
                     </td>
                   </tr>
                 ) : (
-                  bookings.map((r) => (
+                  bookings?.map((r) => (
                     <tr
                       key={r._id}
                       className="border-t border-neutral-800 hover:bg-neutral-900/40"
