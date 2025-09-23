@@ -77,12 +77,12 @@ const BOOkING_API = "https://abudabbba-backend.vercel.app/api/bookings/admin";
 export default function BookingsPage() {
   const dispatch = useDispatch();
   const { list } = useSelector((s) => s.bookings);
-  const bookings = list?.data?.bookings;
+  const bookings = list.data.bookings;
   // no need to fetch
   // useEffect(()=>{
   //   dispatch(getAllBookings(BOOkING_API))
-  // }, [dispatch])
-  // console.log(list.data.bookings);
+  // })
+  console.log(list.data.bookings);
   const [q, setQ] = useState("");
   const [searchField, setSearchField] = useState("name"); // name | phone | email
   const [transferFilter, setTransferFilter] = useState("all"); // all | yes | no
@@ -238,7 +238,7 @@ export default function BookingsPage() {
                 </tr>
               </thead>
               <tbody>
-                {bookings?.length === 0 ? (
+                {bookings.length === 0 ? (
                   <tr>
                     <td
                       colSpan={8}
@@ -248,7 +248,7 @@ export default function BookingsPage() {
                     </td>
                   </tr>
                 ) : (
-                  bookings?.map((r) => (
+                  bookings.map((r) => (
                     <tr
                       key={r._id}
                       className="border-t border-neutral-800 hover:bg-neutral-900/40"
