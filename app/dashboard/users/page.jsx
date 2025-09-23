@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import axios from "axios";
+import { useEffect, useMemo, useState } from "react";
 
 // Example data — swap with your API call
 const USERS = [
@@ -67,7 +68,17 @@ export default function UsersPage() {
   const [sort, setSort] = useState("recent"); // recent | oldest | nameAsc | nameDesc
   const [page, setPage] = useState(1);
   const pageSize = 5;
-
+ 
+  const [allUsers, setallUsers] = useState([]);
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const response = await axios.get(
+        "https://abudabbba-backend.vercel.app/api/bookings/admin"
+      );
+      setallUsers(response.data.bookings); // Save the data to state
+    };
+    fetchUsers();
+  }, []);
   const filtered = useMemo(() => {
     let rows = [...USERS];
 
@@ -212,25 +223,25 @@ export default function UsersPage() {
                 </tr>
               </thead>
               <tbody>
-                {pageRows.length === 0 ? (
+                {allUsers?.length === 0 ? (
                   <tr>
                     <td
                       colSpan={6}
                       className="p-6 text-center text-neutral-400"
                     >
-                      No users found.
+                      No users found. <div className="loader"></div>
                     </td>
                   </tr>
                 ) : (
-                  pageRows.map((u) => (
+                  allUsers?.map((u) => (
                     <tr
                       key={u.id}
                       className="border-t border-neutral-800 hover:bg-neutral-900/40"
                     >
-                      <Td>{u.first}</Td>
-                      <Td>{u.last}</Td>
-                      <Td className="truncate max-w-[280px]">{u.email}</Td>
-                      <Td className="whitespace-nowrap">{u.phone}</Td>
+                      <Td>{u.user.firstName}</Td>
+                      <Td>{u.user.lastName}</Td>
+                      <Td className="truncate max-w-[280px]">{u.user.email}</Td>
+                      <Td className="whitespace-nowrap">{u.user.phone}</Td>
                       <Td>
                         <span
                           className={[
@@ -242,7 +253,7 @@ export default function UsersPage() {
                               : "bg-neutral-700/30 text-neutral-300 ring-neutral-700/50",
                           ].join(" ")}
                         >
-                          {u.role}
+                          user
                         </span>
                       </Td>
                       <Td className="whitespace-nowrap">

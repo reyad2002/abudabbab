@@ -84,16 +84,13 @@ export default function BookingsPage() {
   const [sort, setSort] = useState("recent"); // recent | oldest | nameAsc | nameDesc
   const [page, setPage] = useState(1);
   const pageSize = 5;
-  // console.log(list.data.bookings)
-  // const allBookings = list.data.bookings
-  // useEffect(() => {
-
-  //   dispatch(getAllBookings("https://abudabbba-backend.vercel.app/api/bookings/admin"));
-  // }, [dispatch]);
+ 
   const [allBookings, setAllBookings] = useState([]);
   useEffect(() => {
     const fetchBookings = async () => {
-      const response = await axios.get("https://abudabbba-backend.vercel.app/api/bookings/admin");
+      const response = await axios.get(
+        "https://abudabbba-backend.vercel.app/api/bookings/admin"
+      );
       setAllBookings(response.data.bookings); // Save the data to state
     };
     fetchBookings();
