@@ -1,5 +1,6 @@
 "use client";
 
+import axios from "axios";
 import { getAllBookings } from "../../../lib/apis/bookingsApi";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -75,20 +76,30 @@ const SEED = [
 ];
 
 export default function BookingsPage() {
-  const dispatch = useDispatch()
-  const {list} = useSelector((s)=>s.bookings)
+  const dispatch = useDispatch();
+  const { list } = useSelector((s) => s.bookings);
   const [q, setQ] = useState("");
   const [searchField, setSearchField] = useState("name"); // name | phone | email
   const [transferFilter, setTransferFilter] = useState("all"); // all | yes | no
   const [sort, setSort] = useState("recent"); // recent | oldest | nameAsc | nameDesc
   const [page, setPage] = useState(1);
   const pageSize = 5;
-  console.log(list.data.bookings)
-  const allBookings = list.data.bookings
+  // console.log(list.data.bookings)
+  // const allBookings = list.data.bookings
   // useEffect(() => {
-  //   // طلب البيانات من الـ API عند تحميل المكون
+
   //   dispatch(getAllBookings("https://abudabbba-backend.vercel.app/api/bookings/admin"));
   // }, [dispatch]);
+  const [allBookings, setAllBookings] = useState([]);
+
+  useEffect(async () => {
+    const response = await axios.get(
+      "https://abudabbba-backend.vercel.app/api/bookings/admin"
+    );
+
+    setAllBookings(response.data.bookings); // Save the data to state
+  }, []);
+  console.log(allBookings);
   // const filtered = useMemo(() => {
   //   let rows = [...bookings];
 
