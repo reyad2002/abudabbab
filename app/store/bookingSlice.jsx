@@ -12,7 +12,7 @@ import {getAllBookings,postBooking,getAdvancedTripInfo,getTotalBookingsAndRevenu
 
 const initialState = {
   // قوائم
-  list: [],            // كل الحجوزات (لو هتستخدمها)
+  list: {},            // كل الحجوزات (لو هتستخدمها)
   advancedInfo: [],    // نتايج advancedTripsInfos (لكل رحلة)
   totals: {            // إجماليات عامة
     totalBookings: "",

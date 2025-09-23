@@ -1,6 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { getAllBookings } from "../../../lib/apis/bookingsApi";
+import { useEffect, useMemo, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 // Dummy rows – replace with your API data
 const SEED = [
@@ -71,66 +73,72 @@ const SEED = [
     bookedAt: "2025-06-12",
   },
 ];
-
+const BOOkING_API = "https://abudabbba-backend.vercel.app/api/bookings/admin";
 export default function BookingsPage() {
+  const dispatch = useDispatch();
+  const { list } = useSelector((s) => s.bookings);
+  const bookings = list?.data?.bookings;
+  // no need to fetch
+  useEffect(()=>{
+    dispatch(getAllBookings(BOOkING_API))
+  }, [dispatch])
+  // console.log(list.data.bookings);
   const [q, setQ] = useState("");
   const [searchField, setSearchField] = useState("name"); // name | phone | email
   const [transferFilter, setTransferFilter] = useState("all"); // all | yes | no
   const [sort, setSort] = useState("recent"); // recent | oldest | nameAsc | nameDesc
   const [page, setPage] = useState(1);
-  const pageSize = 3;
+  const pageSize = 5;
 
-  const filtered = useMemo(() => {
-    let rows = [...SEED];
+  // const filtered = useMemo(() => {
+  //   let rows = [...bookings];
 
-    // Search
-    if (q.trim()) {
-      const needle = q.toLowerCase();
-      rows = rows.filter((r) => {
-        const map = {
-          name: r.userName,
-          phone: r.phone,
-          email: r.email,
-        };
-        return (map[searchField] || "").toLowerCase().includes(needle);
-      });
-    }
+  //   // Search
+  //   if (q.trim()) {
+  //     const needle = q.toLowerCase();
+  //     rows = rows.filter((r) => {
+  //       const map = {
+  //         name: r.userName,
+  //         phone: r.phone,
+  //         email: r.email,
+  //       };
+  //       return (map[searchField] || "").toLowerCase().includes(needle);
+  //     });
+  //   }
 
-    // Transfer filter
-    if (transferFilter !== "all") {
-      rows = rows.filter((r) =>
-        transferFilter === "yes" ? r.transfer === "Yes" : r.transfer === "No"
-      );
-    }
+  //   // Transfer filter
+  //   if (transferFilter !== "all") {
+  //     rows = rows.filter((r) =>
+  //       transferFilter === "yes" ? r.transfer === "Yes" : r.transfer === "No"
+  //     );
+  //   }
 
-    // Sort
-    rows.sort((a, b) => {
-      switch (sort) {
-        case "recent":
-          return new Date(b.bookedAt) - new Date(a.bookedAt);
-        case "oldest":
-          return new Date(a.bookedAt) - new Date(b.bookedAt);
-        case "nameAsc":
-          return a.userName.localeCompare(b.userName);
-        case "nameDesc":
-          return b.userName.localeCompare(a.userName);
-        default:
-          return 0;
-      }
-    });
+  //   // Sort
+  //   rows.sort((a, b) => {
+  //     switch (sort) {
+  //       case "recent":
+  //         return new Date(b.bookedAt) - new Date(a.bookedAt);
+  //       case "oldest":
+  //         return new Date(a.bookedAt) - new Date(b.bookedAt);
+  //       case "nameAsc":
+  //         return a.userName.localeCompare(b.userName);
+  //       case "nameDesc":
+  //         return b.userName.localeCompare(a.userName);
+  //       default:
+  //         return 0;
+  //     }
+  //   });
 
-    return rows;
-  }, [q, searchField, transferFilter, sort]);
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
-  const pageRows = filtered.slice((page - 1) * pageSize, page * pageSize);
+  //   return rows;
+  // }, [q, searchField, transferFilter, sort]);
+  // console.log(filtered)
+  // const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  // const pageRows = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   const resetToFirst = () => setPage(1);
 
   return (
     <div className="min-h-screen bg-neutral-900 text-neutral-200">
-     
-
       {/* Content */}
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-lg font-semibold tracking-wide">TOTAL BOOKINGS</h1>
@@ -225,11 +233,12 @@ export default function BookingsPage() {
                   <Th>Adult num</Th>
                   <Th>Child num</Th>
                   <Th>transfer</Th>
-                  <Th>booking date</Th>
+                  <Th>Trip date</Th>
+                  <Th>Booking date</Th>
                 </tr>
               </thead>
               <tbody>
-                {pageRows.length === 0 ? (
+                {bookings?.length === 0 ? (
                   <tr>
                     <td
                       colSpan={8}
@@ -239,31 +248,35 @@ export default function BookingsPage() {
                     </td>
                   </tr>
                 ) : (
-                  pageRows.map((r) => (
+                  bookings?.map((r) => (
                     <tr
-                      key={r.id}
+                      key={r._id}
                       className="border-t border-neutral-800 hover:bg-neutral-900/40"
                     >
-                      <Td>{r.userName}</Td>
-                      <Td className="whitespace-nowrap">{r.phone}</Td>
-                      <Td className="truncate max-w-[220px]">{r.email}</Td>
-                      <Td>{r.tripName}</Td>
-                      <Td>{r.adults}</Td>
-                      <Td>{r.children}</Td>
+                      <Td>{r.user.firstName}</Td>
+                      <Td className="whitespace-nowrap">{r.user.phone}</Td>
+                      <Td className="truncate max-w-[220px]">{r.user.email}</Td>
+                      <Td>{r?.tripInfo?.name}</Td>
+                      <Td>{r.adult}</Td>
+                      <Td>{r.child}</Td>
                       <Td>
                         <span
                           className={[
                             "inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium",
-                            r.transfer === "Yes"
+                            r.transportation == true
                               ? "bg-emerald-600/20 text-emerald-300 ring-1 ring-emerald-700/40"
                               : "bg-neutral-700/30 text-neutral-300 ring-1 ring-neutral-700/50",
                           ].join(" ")}
                         >
-                          {r.transfer}
+                          {r.transportation ? "Yes" : "No"}
                         </span>
+                        {r.transportation}
                       </Td>
                       <Td className="whitespace-nowrap">
-                        {new Date(r.bookedAt).toLocaleDateString()}
+                        {new Date(r.bookingDate).toLocaleDateString()}
+                      </Td>
+                      <Td className="whitespace-nowrap">
+                        {new Date(r.createdAt).toLocaleDateString()}
                       </Td>
                     </tr>
                   ))
@@ -274,38 +287,24 @@ export default function BookingsPage() {
         </div>
 
         {/* Pagination */}
-        <div className="mt-6 flex items-center justify-center gap-2">
-          <PageBtn disabled={page === 1} onClick={() => setPage((p) => p - 1)}>
+        {/* <div className="mt-6 flex items-center justify-center gap-2">
+          <PageBtn >
             Prev
           </PageBtn>
-          {Array.from({ length: totalPages }).map((_, i) => {
-            const n = i + 1;
-            const active = n === page;
-            return (
-              <button
-                key={n}
-                onClick={() => setPage(n)}
-                className={[
-                  "h-9 min-w-9 rounded-xl px-3 text-sm",
-                  active
-                    ? "bg-neutral-200 text-neutral-900"
-                    : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700",
-                ].join(" ")}
-              >
-                {n}
-              </button>
-            );
-          })}
+
+          <button
+            onClick={() => setPage(n)}
+            className={["h-9 min-w-9 rounded-xl px-3 text-sm"]}
+          ></button>
+
           <PageBtn
             disabled={page === totalPages}
             onClick={() => setPage((p) => p + 1)}
           >
             Next
           </PageBtn>
-        </div>
+        </div> */}
       </main>
-
-      
     </div>
   );
 }

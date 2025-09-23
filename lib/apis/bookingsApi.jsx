@@ -6,7 +6,8 @@ export const getAllBookings = createAsyncThunk(
     "bookings/getAllBookings",
     async (url) => {
       const response = await axios.get(url);
-      return response.data.data;
+      // console.log(response.data)
+      return response;
     }
   );
   
