@@ -1,4 +1,3 @@
-// // app/dashboard/advanced-infos/page.jsx
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
@@ -64,11 +63,11 @@ function StatCard({ icon: Icon, label, value, sub }) {
 function Toolbar({
   query,
   setQuery,
-  currency,
-  setCurrency,
+
   sortBy,
   setSortBy,
   onRefresh,
+  handelSearchTrip,
 }) {
   return (
     <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-3 sm:p-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -78,6 +77,7 @@ function Toolbar({
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            onKeyUp={() => handelSearchTrip} // تعديل هنا
             placeholder="Search trips…"
             className="pl-9 pr-3 py-2 w-64 rounded-lg border border-zinc-800 bg-zinc-950/60 text-sm outline-none focus:ring-2 focus:ring-zinc-700/50"
           />
@@ -92,7 +92,7 @@ function Toolbar({
       </div>
 
       <div className="flex items-center gap-2">
-        <div className="hidden sm:flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-950/60 p-1">
+        {/* <div className="hidden sm:flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-950/60 p-1">
           <button
             onClick={() => setCurrency("EGP")}
             className={`px-3 py-1.5 rounded-md text-xs ${
@@ -113,7 +113,7 @@ function Toolbar({
           >
             EUR
           </button>
-        </div>
+        </div> */}
 
         <div className="relative">
           <ArrowUpDown className="absolute left-3 top-2.5 h-4 w-4 text-zinc-500" />
@@ -213,12 +213,18 @@ export default function AdvancedInfosPage() {
     advancedError,
     totals,
     totalsLoading,
-    totalsError,
-  } = useSelector((s) => s.bookings); // ✅ خُد بالك: state.bookings
-  console.log(advancedInfo);
+  } = useSelector((s) => s.bookings);
+
   const [query, setQuery] = useState("");
-  const [currency, setCurrency] = useState("EGP");
+
   const [sortBy, setSortBy] = useState("revenue");
+
+  // search filter for trips
+  const handelSearchTrip = useMemo(() => {
+    return advancedInfo.filter((t) =>
+      t.tripName.toLowerCase().includes(query.toLowerCase())
+    );
+  }, [query, advancedInfo]);
 
   useEffect(() => {
     dispatch(getAdvancedTripInfo(ADVANCED_URL));
@@ -269,10 +275,9 @@ export default function AdvancedInfosPage() {
         <Toolbar
           query={query}
           setQuery={setQuery}
-          currency={currency}
-          setCurrency={setCurrency}
           sortBy={sortBy}
           setSortBy={setSortBy}
+          handelSearchTrip={handelSearchTrip}
           onRefresh={() => {
             dispatch(getAdvancedTripInfo(ADVANCED_URL));
             dispatch(getTotalBookingsAndRevenue(TOTALS_URL));
@@ -282,32 +287,15 @@ export default function AdvancedInfosPage() {
         {/* List */}
         {advancedLoading ? (
           <div className="loader"></div>
-        ) : advancedInfo?.length && (
-          advancedInfo.map((t) => (
-            <TripRow
-              key={t.tripId ?? t._id ?? t.tripName}
-              t={t}
-              currency={currency}
-            />
+        ) : handelSearchTrip?.length ? (
+          handelSearchTrip.map((t) => (
+            <TripRow key={t.tripId ?? t._id ?? t.tripName} t={t} />
           ))
-        ) }
-
-        {/* {!advancedLoading && !advancedError && (
-          <div className="space-y-4">
-            {filteredSorted.map((t) => (
-              <TripRow
-                key={t.tripId || t._id || t.tripName}
-                t={t}
-                currency={currency}
-              />
-            ))}
-            {filteredSorted.length === 0 && (
-              <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-8 text-center text-zinc-400">
-                No results. Try a different search or sort.
-              </div>
-            )}
+        ) : (
+          <div className="text-center text-red-500 font-semibold">
+            Trip Not Found
           </div>
-        )} */}
+        )}
       </main>
 
       <div className="pointer-events-none fixed inset-4 rounded-3xl border border-zinc-800/80" />
