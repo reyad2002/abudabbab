@@ -1,115 +1,48 @@
 "use client";
 
 import axios from "axios";
-import { getAllBookings } from "../../../lib/apis/bookingsApi";
-import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-
-// Dummy rows – replace with your API data
-const SEED = [
-  {
-    id: "b1",
-    userName: "Mariam Hassan",
-    phone: "+20 100 555 1234",
-    email: "mariam@example.com",
-    tripName: "Island Escape",
-    adults: 2,
-    children: 1,
-    transfer: "Yes",
-    bookedAt: "2025-07-01",
-  },
-  {
-    id: "b2",
-    userName: "Omar N.",
-    phone: "+20 111 331 8989",
-    email: "omar@example.com",
-    tripName: "Mountain Trek",
-    adults: 1,
-    children: 0,
-    transfer: "No",
-    bookedAt: "2025-06-28",
-  },
-  {
-    id: "b3",
-    userName: "Laila Farouk",
-    phone: "+20 122 444 9090",
-    email: "laila@example.com",
-    tripName: "Island Escape",
-    adults: 4,
-    children: 2,
-    transfer: "Yes",
-    bookedAt: "2025-06-21",
-  },
-  {
-    id: "b4",
-    userName: "Youssef Adel",
-    phone: "+20 151 000 2222",
-    email: "youssef@example.com",
-    tripName: "City Lights",
-    adults: 3,
-    children: 0,
-    transfer: "No",
-    bookedAt: "2025-06-18",
-  },
-  {
-    id: "b5",
-    userName: "Nour Samir",
-    phone: "+20 109 777 4321",
-    email: "nour@example.com",
-    tripName: "Desert Safari",
-    adults: 2,
-    children: 2,
-    transfer: "Yes",
-    bookedAt: "2025-06-15",
-  },
-  {
-    id: "b6",
-    userName: "Karim M.",
-    phone: "+20 102 808 7788",
-    email: "karim@example.com",
-    tripName: "Island Escape",
-    adults: 2,
-    children: 0,
-    transfer: "No",
-    bookedAt: "2025-06-12",
-  },
-];
+import { useEffect, useState } from "react";
+import { FaWhatsapp } from "react-icons/fa"; // Importing WhatsApp icon
 
 export default function BookingsPage() {
   const dispatch = useDispatch();
   const { list } = useSelector((s) => s.bookings);
   const [q, setQ] = useState("");
-  const [searchField, setSearchField] = useState("name"); // name | phone | email
-  const [transferFilter, setTransferFilter] = useState("all"); // all | yes | no
-  const [sort, setSort] = useState("recent"); // recent | oldest | nameAsc | nameDesc
+  const [searchField, setSearchField] = useState("name");
+  const [transferFilter, setTransferFilter] = useState("all");
+  const [sort, setSort] = useState("recent");
   const [page, setPage] = useState(1);
-  const pageSize = 5;
- 
+  const [limit, setLimit] = useState(8);
+
   const [allBookings, setAllBookings] = useState([]);
-  const [totalBookingss, setTotalBookingss] = useState([]);
+  const [totalBookings, setTotalBookings] = useState(0);
+
   useEffect(() => {
     const fetchBookings = async () => {
       const response = await axios.get(
-        "https://abudabbba-backend.vercel.app/api/bookings/admin?limit=100"
+        `https://abudabbba-backend.vercel.app/api/bookings/admin?page=${page}&limit=${limit}`
       );
       setAllBookings(response.data.bookings); // Save the data to state
-      setTotalBookingss(response.data.totalBookings); // Save the data to state
+      setTotalBookings(response.data.totalBookings); // Save the data to state
     };
     fetchBookings();
-  }, []);
-  // console.log(allBookings);
-  // console.log(alldata);
+  }, [page]); // Adding `page` as a dependency
 
   const resetToFirst = () => setPage(1);
+
+  const totalPages = Math.ceil(totalBookings / limit);
 
   return (
     <div className="min-h-screen bg-neutral-900 text-neutral-200">
       {/* Content */}
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-lg font-semibold tracking-wide">TOTAL BOOKINGS : {totalBookingss}</h1>
+        <h1 className="text-lg font-semibold tracking-wide">
+          TOTAL BOOKINGS : {totalBookings}
+        </h1>
 
         {/* Controls */}
-        <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6 mt-7">
           {/* Search */}
           <div className="flex items-center gap-2">
             <div className="relative flex-1">
@@ -138,7 +71,7 @@ export default function BookingsPage() {
                 }}
                 className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-xs text-neutral-300 focus:ring-2 focus:ring-neutral-700"
               >
-                <option value="name">nname</option>
+                <option value="name">name</option>
                 <option value="phone">phone</option>
                 <option value="email">email</option>
               </select>
@@ -183,6 +116,22 @@ export default function BookingsPage() {
               <option value="nameDesc">Name Z → A</option>
             </select>
           </div>
+          {/* Pagination */}
+
+          <div className="flex items-center gap-2 justify-end">
+            <PageBtn disabled={page === 1} onClick={() => setPage(page - 1)}>
+              Prev
+            </PageBtn>
+            <span className="text-sm text-neutral-400">
+              {page} / {totalPages}
+            </span>
+            <PageBtn
+              disabled={page === totalPages}
+              onClick={() => setPage(page + 1)}
+            >
+              Next
+            </PageBtn>
+          </div>
         </div>
 
         {/* Table */}
@@ -219,7 +168,20 @@ export default function BookingsPage() {
                       className="border-t border-neutral-800 hover:bg-neutral-900/40"
                     >
                       <Td>{r.user.firstName}</Td>
-                      <Td className="whitespace-nowrap">{r.user.phone}</Td>
+                      <Td className="whitespace-nowrap flex items-center gap-2">
+                        <a
+                          href={`https://wa.me/${
+                            "+20" + r.user.phone.replace(/\D/g, "")
+                          }`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-green-500 hover:text-green-400"
+                          title="Chat on WhatsApp"
+                        >
+                          <FaWhatsapp />
+                        </a>
+                        {r.user.phone}
+                      </Td>
                       <Td className="truncate max-w-[220px]">{r.user.email}</Td>
                       <Td>{r?.tripInfo?.name}</Td>
                       <Td>{r.adult}</Td>
@@ -235,7 +197,6 @@ export default function BookingsPage() {
                         >
                           {r.transportation ? "Yes" : "No"}
                         </span>
-                        {r.transportation}
                       </Td>
                       <Td className="whitespace-nowrap">
                         {new Date(r.bookingDate).toLocaleDateString()}
@@ -253,18 +214,18 @@ export default function BookingsPage() {
 
         {/* Pagination */}
         {/* <div className="mt-6 flex items-center justify-center gap-2">
-          <PageBtn >
+          <PageBtn
+            disabled={page === 1}
+            onClick={() => setPage(page - 1)}
+          >
             Prev
           </PageBtn>
-
-          <button
-            onClick={() => setPage(n)}
-            className={["h-9 min-w-9 rounded-xl px-3 text-sm"]}
-          ></button>
-
+          <span className="text-sm text-neutral-400">
+            {page} / {totalPages}
+          </span>
           <PageBtn
             disabled={page === totalPages}
-            onClick={() => setPage((p) => p + 1)}
+            onClick={() => setPage(page + 1)}
           >
             Next
           </PageBtn>
@@ -283,19 +244,21 @@ function Th({ children }) {
     </th>
   );
 }
+
 function Td({ children, className = "" }) {
   return <td className={`px-4 py-4 align-middle ${className}`}>{children}</td>;
 }
+
 function PageBtn({ children, disabled, onClick }) {
   return (
     <button
       onClick={onClick}
       disabled={disabled}
       className={[
-        "h-9 rounded-xl px-3 text-sm",
+        "h-9 rounded-lg px-3 text-sm font-medium",
         disabled
-          ? "bg-neutral-800 text-neutral-500 cursor-not-allowed"
-          : "bg-neutral-800 text-neutral-200 hover:bg-neutral-700",
+          ? "bg-neutral-700 text-neutral-500 cursor-not-allowed"
+          : "bg-[#1c4521b3] text-gray-200 border-[#32c800] border-1 hover:bg-[#1c4521cc]",
       ].join(" ")}
     >
       {children}
