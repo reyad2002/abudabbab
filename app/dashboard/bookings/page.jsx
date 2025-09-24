@@ -22,14 +22,34 @@ export default function BookingsPage() {
 
   useEffect(() => {
     const fetchBookings = async () => {
-      const response = await axios.get(
-        `https://abudabbba-backend.vercel.app/api/bookings/admin?page=${page}&limit=${limit}`
-      );
-      setAllBookings(response.data.bookings); // Save the data to state
-      setTotalBookings(response.data.totalBookings); // Save the data to state
+      try {
+        // بناء الـ query string بناءً على الفلاتر
+        const params = {
+          page,
+          limit,
+          sort,
+          q,
+          searchField,
+          transferFilter,
+        };
+  
+        const response = await axios.get(
+          `https://abudabbba-backend.vercel.app/api/bookings/admin`, {
+            params, // إرسال الفلاتر كـ query parameters
+          }
+        );
+  
+        setAllBookings(response.data.bookings); // حفظ البيانات
+        setTotalBookings(response.data.totalBookings); // حفظ العدد الإجمالي
+      } catch (error) {
+        console.error("Error fetching bookings:", error);
+      }
     };
+  
     fetchBookings();
-  }, [page]); // Adding `page` as a dependency
+  }, [page, q, searchField, transferFilter, sort, limit]); // إضافة الفلاتر كـ dependencies
+  
+  
 
   const resetToFirst = () => setPage(1);
 
@@ -121,10 +141,10 @@ export default function BookingsPage() {
               }}
               className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
             >
-              <option value="recent">Most recent</option>
-              <option value="oldest">Oldest</option>
-              <option value="nameAsc">Name A → Z</option>
-              <option value="nameDesc">Name Z → A</option>
+              <option value="dest">Newest</option>
+              <option value="asc">Oldest</option>
+              {/* <option value="nameAsc">Name A → Z</option>
+              <option value="nameDesc">Name Z → A</option> */}
             </select>
           </div>
           {/* Pagination */}
@@ -302,16 +322,7 @@ export default function BookingsPage() {
                   <p>
                     <strong>Trip Name:</strong> {selectedBooking.tripInfo.name}
                   </p>
-                  {/* <div className="relative">
-                    <img
-                      src={selectedBooking.tripInfo.images[0]}
-                      alt="Trip Image"
-                      className="w-full h-[300px] object-cover rounded-lg mb-4"
-                    />
-                    <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white px-2 py-1 text-sm rounded-lg">
-                      Trip Image
-                    </div>
-                  </div> */}
+                 
                   <p>
                     <strong>Booking Date:</strong>{" "}
                     {new Date(selectedBooking.bookingDate).toLocaleDateString()}
