@@ -3,7 +3,7 @@
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
-import { FaWhatsapp } from "react-icons/fa"; // Importing WhatsApp icon
+import { FaEnvelope, FaWhatsapp } from "react-icons/fa"; // Importing WhatsApp icon
 
 export default function BookingsPage() {
   const dispatch = useDispatch();
@@ -17,6 +17,8 @@ export default function BookingsPage() {
 
   const [allBookings, setAllBookings] = useState([]);
   const [totalBookings, setTotalBookings] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState(null);
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -32,6 +34,15 @@ export default function BookingsPage() {
   const resetToFirst = () => setPage(1);
 
   const totalPages = Math.ceil(totalBookings / limit);
+  const openModal = (booking) => {
+    setSelectedBooking(booking);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedBooking(null);
+  };
 
   return (
     <div className="min-h-screen bg-neutral-900 text-neutral-200">
@@ -142,13 +153,14 @@ export default function BookingsPage() {
                 <tr>
                   <Th>User name</Th>
                   <Th>phone</Th>
-                  <Th>email</Th>
+                  {/* <Th>email</Th> */}
                   <Th>Trip name</Th>
-                  <Th>Adult num</Th>
-                  <Th>Child num</Th>
+                  {/* <Th>Adult num</Th>
+                  <Th>Child num</Th> */}
                   <Th>transfer</Th>
                   <Th>Trip date</Th>
                   <Th>Booking date</Th>
+                  <Th>more info</Th>
                 </tr>
               </thead>
               <tbody>
@@ -182,10 +194,16 @@ export default function BookingsPage() {
                         </a>
                         {r.user.phone}
                       </Td>
-                      <Td className="truncate max-w-[220px]">{r.user.email}</Td>
+                      {/* <Td className="truncate max-w-[220px] ">  <a
+                          href={`mailto:${r.user.email}`}
+                          className="text-blue-500 hover:text-blue-400"
+                          title="Send email"
+                        >
+                          <FaEnvelope />
+                        </a>{r.user.email}</Td> */}
                       <Td>{r?.tripInfo?.name}</Td>
-                      <Td>{r.adult}</Td>
-                      <Td>{r.child}</Td>
+                      {/* <Td>{r.adult}</Td>
+                      <Td>{r.child}</Td> */}
                       <Td>
                         <span
                           className={[
@@ -203,6 +221,14 @@ export default function BookingsPage() {
                       </Td>
                       <Td className="whitespace-nowrap">
                         {new Date(r.createdAt).toLocaleDateString()}
+                      </Td>
+                      <Td className="px-4 py-4">
+                        <button
+                          onClick={() => openModal(r)}
+                          className="px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+                        >
+                          See More
+                        </button>
                       </Td>
                     </tr>
                   ))
@@ -230,6 +256,85 @@ export default function BookingsPage() {
             Next
           </PageBtn>
         </div> */}
+        {/* Modal */}
+        {isModalOpen && selectedBooking && (
+          <div className="fixed inset-0 bg-black/30 bg-opacity-50 flex justify-center items-center z-50 transition-all duration-300 ease-in-out">
+            <div className="bg-neutral-900 text-neutral-200 p-8 rounded-2xl w-4/5 sm:w-1/2 max-w-3xl shadow-lg transform transition-transform duration-300 ease-in-out">
+              <h2 className="text-2xl font-semibold mb-6 text-center">
+                Booking Details
+              </h2>
+
+              {/* User Information */}
+              <div className="mb-6">
+                <h3 className="font-semibold text-lg mb-2">User Information</h3>
+                <div className="space-y-2">
+                  <p>
+                    <strong>Name:</strong> {selectedBooking.user.firstName}{" "}
+                    {selectedBooking.user.lastName}
+                  </p>
+                  <div>
+                    <div className="flex gap-2  items-center">
+                    <strong>Email:</strong>{" "}
+                    <a
+                      href={`mailto:${selectedBooking.user.email}`}
+                      className="text-blue-500 hover:text-blue-400"
+                      title="Send email"
+                    >
+                      <FaEnvelope />
+                    </a>
+
+                    <p>{selectedBooking.user.email}</p>
+                    </div>
+                  </div>
+                  <p>
+                    <strong>Phone:</strong> {selectedBooking.user.phone}
+                  </p>
+                  <p>
+                    <strong>Message:</strong> {selectedBooking.user.message}
+                  </p>
+                </div>
+              </div>
+
+              {/* Trip Information */}
+              <div className="mb-6">
+                <h3 className="font-semibold text-lg mb-2">Trip Information</h3>
+                <div className="space-y-2">
+                  <p>
+                    <strong>Trip Name:</strong> {selectedBooking.tripInfo.name}
+                  </p>
+                  {/* <div className="relative">
+                    <img
+                      src={selectedBooking.tripInfo.images[0]}
+                      alt="Trip Image"
+                      className="w-full h-[300px] object-cover rounded-lg mb-4"
+                    />
+                    <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white px-2 py-1 text-sm rounded-lg">
+                      Trip Image
+                    </div>
+                  </div> */}
+                  <p>
+                    <strong>Booking Date:</strong>{" "}
+                    {new Date(selectedBooking.bookingDate).toLocaleDateString()}
+                  </p>
+                  <p>
+                    <strong>Transportation:</strong>{" "}
+                    {selectedBooking.transportation ? "Yes" : "No"}
+                  </p>
+                </div>
+              </div>
+
+              {/* Close Button */}
+              <div className="flex justify-center">
+                <button
+                  onClick={closeModal}
+                  className="px-6 py-3 bg-red-600 text-white rounded-full shadow-lg hover:bg-red-700 transition-colors duration-300"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
