@@ -34,7 +34,7 @@ export default function UsersPage() {
   return (
     <div className="min-h-screen bg-neutral-900 text-neutral-100">
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-2xl font-bold tracking-wide text-[#8dea98b3] mb-6">
+        <h1 className="text-2xl font-bold tracking-wide text-neutral-200 mb-6">
           All Users
         </h1>
 
