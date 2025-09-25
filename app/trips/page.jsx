@@ -87,10 +87,11 @@ export default function TripsSection() {
           viewport={{ once: true, amount: 0.2 }}
         >
           {trips.map((t) => (
+
             <motion.article
               key={t._id}
               variants={item}
-              className="group relative snap-center lg:snap-none rounded-xl border border-slate-200 bg-white shadow-sm transition"
+              className={t.isActive !== true ? "hidden" : "group relative snap-center lg:snap-none rounded-xl border border-slate-200 bg-white shadow-sm transition"}
               whileHover={{ y: -6, boxShadow: "0 20px 40px rgba(2,6,23,0.08)" }}
               whileTap={{ scale: 0.99 }}
             >
