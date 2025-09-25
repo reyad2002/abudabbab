@@ -6,7 +6,7 @@ import { FaWhatsapp } from "react-icons/fa"; // Importing WhatsApp icon
 
 export default function UsersPage() {
   const [q, setQ] = useState("");
-  const [searchField, setSearchField] = useState("name");
+  const [searchField, setSearchField] = useState("firstName");
   const [roleFilter, setRoleFilter] = useState("all");
   const [sort, setSort] = useState("recent");
   const [page, setPage] = useState(1);
@@ -17,17 +17,30 @@ export default function UsersPage() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
+        const params = {
+          page,
+          limit,
+          q,           // نص البحث
+          searchField, // firstName / lastName / email / phone
+          roleFilter,  // all / admin / manager / user
+          sort,        // recent / oldest / nameAsc / nameDesc
+        };
+  
         const response = await axios.get(
-          `https://abudabbba-backend.vercel.app/api/bookings/admin?page=${page}&limit=${limit}`
+          `https://abudabbba-backend.vercel.app/api/bookings/admin`,
+          { params }
         );
-        setAllUsers(response.data.bookings);
-        setTotalPages(response.data.totalPages);
+  
+        setAllUsers(response.data.bookings); // أو response.data.users حسب الـ API
+        setTotalPages(response.data.totalPages || Math.ceil(response.data.totalBookings / limit));
       } catch (err) {
         console.error(err);
       }
     };
+  
     fetchUsers();
-  }, [page, limit]);
+  }, [page, limit, q, searchField, roleFilter, sort]); // كل فلتر أو بحث أو صفحة يعيد تحميل البيانات
+  
 
   const resetPage = () => setPage(1);
 
@@ -106,10 +119,9 @@ export default function UsersPage() {
               }}
               className="rounded-lg border border-neutral-700 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-emerald-400"
             >
-              <option value="recent">Newest</option>
-              <option value="oldest">Oldest</option>
-              <option value="nameAsc">Name A → Z</option>
-              <option value="nameDesc">Name Z → A</option>
+              <option value="desc">Newest</option>
+              <option value="asc">Oldest</option>
+            
             </select>
           </div>
 
@@ -151,7 +163,8 @@ export default function UsersPage() {
                       colSpan={6}
                       className="p-6 text-center text-neutral-400"
                     >
-                      No users found.<div className="loader"></div>
+                      No users found.
+                      {/* <div className="loader"></div> */}
                     </td>
                   </tr>
                 ) : (

@@ -9,12 +9,11 @@ export default function BookingsPage() {
   const dispatch = useDispatch();
   const { list } = useSelector((s) => s.bookings);
   const [q, setQ] = useState("");
-  const [searchField, setSearchField] = useState("name");
+  const [searchField, setSearchField] = useState("firstName");
   const [transferFilter, setTransferFilter] = useState("all");
   const [sort, setSort] = useState("recent");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(8);
-
   const [allBookings, setAllBookings] = useState([]);
   const [totalBookings, setTotalBookings] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -102,7 +101,7 @@ export default function BookingsPage() {
                 }}
                 className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-xs text-neutral-300 focus:ring-2 focus:ring-neutral-700"
               >
-                <option value="name">name</option>
+                <option value="firstName">name</option>
                 <option value="phone">phone</option>
                 <option value="email">email</option>
               </select>
@@ -141,7 +140,7 @@ export default function BookingsPage() {
               }}
               className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
             >
-              <option value="dest">Newest</option>
+              <option value="desc">Newest</option>
               <option value="asc">Oldest</option>
               {/* <option value="nameAsc">Name A → Z</option>
               <option value="nameDesc">Name Z → A</option> */}
@@ -178,19 +177,20 @@ export default function BookingsPage() {
                   {/* <Th>Adult num</Th>
                   <Th>Child num</Th> */}
                   <Th>transfer</Th>
-                  <Th>Trip date</Th>
-                  <Th>Booking date</Th>
+                  <Th>booking date</Th>
+                  <Th>Created At</Th>
                   <Th>more info</Th>
                 </tr>
               </thead>
               <tbody>
+                {}
                 {allBookings?.length === 0 ? (
                   <tr>
                     <td
                       colSpan={8}
                       className="p-6 text-center text-neutral-400"
                     >
-                      No results. <div className="loader"></div>
+                      No results.
                     </td>
                   </tr>
                 ) : (
@@ -320,7 +320,7 @@ export default function BookingsPage() {
                 <h3 className="font-semibold text-lg mb-2">Trip Information</h3>
                 <div className="space-y-2">
                   <p>
-                    <strong>Trip Name:</strong> {selectedBooking.tripInfo.name}
+                    <strong>Trip Name:</strong> {selectedBooking.tripInfo?.name}
                   </p>
                  
                   <p>
