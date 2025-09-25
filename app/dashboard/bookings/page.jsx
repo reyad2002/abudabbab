@@ -37,7 +37,9 @@ export default function BookingsPage() {
             params, // إرسال الفلاتر كـ query parameters
           }
         );
-  
+        if(response.data.bookings?.length === 0 ){
+          setPage(0)
+        }
         setAllBookings(response.data.bookings); // حفظ البيانات
         setTotalBookings(response.data.totalBookings); // حفظ العدد الإجمالي
       } catch (error) {
@@ -149,7 +151,7 @@ export default function BookingsPage() {
           {/* Pagination */}
 
           <div className="flex items-center gap-2 justify-end">
-            <PageBtn disabled={page === 1} onClick={() => setPage(page - 1)}>
+            <PageBtn disabled={page <= 1} onClick={() => setPage(page - 1)}>
               Prev
             </PageBtn>
             <span className="text-sm text-neutral-400">

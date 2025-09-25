@@ -30,7 +30,9 @@ export default function UsersPage() {
           `https://abudabbba-backend.vercel.app/api/bookings/admin`,
           { params }
         );
-  
+        if(response.data.bookings?.length === 0 ){
+          setPage(0)
+        }
         setAllUsers(response.data.bookings); // أو response.data.users حسب الـ API
         setTotalPages(response.data.totalPages || Math.ceil(response.data.totalBookings / limit));
       } catch (err) {
@@ -127,7 +129,7 @@ export default function UsersPage() {
 
           {/* Pagination Controls */}
           <div className="flex items-center gap-2 justify-end">
-            <PageBtn disabled={page === 1} onClick={() => setPage(page - 1)}>
+            <PageBtn disabled={page <= 1} onClick={() => setPage(page - 1)}>
               Prev
             </PageBtn>
             <span className="text-sm text-neutral-400">
