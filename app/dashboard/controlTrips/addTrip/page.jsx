@@ -1,9 +1,10 @@
 "use client";
 
+import { CldUploadWidget } from "next-cloudinary";
 import { postTrip } from "../../../../lib/apis/tripsApi";
 import Link from "next/link";
 import React from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { useDispatch } from "react-redux";
 
 export default function AddTripPageRHF() {
@@ -178,7 +179,7 @@ export default function AddTripPageRHF() {
                       )}
                     </div>
 
-                    <input
+                    {/* <input
                       className={inputCls(
                         errors?.images?.[i]?.url,
                         "flex-1 min-w-0"
@@ -187,7 +188,71 @@ export default function AddTripPageRHF() {
                       {...register(`images.${i}.url`, {
                         required: "URL required",
                       })}
+                    /> */}
+
+
+        <Controller
+                      control={control}
+                      name={`images.${i}.url`}
+                      rules={{ required: "URL required" }}
+                      render={({ field: { value, onChange, onBlur, ref } }) => (
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <input
+                            ref={ref}
+                            value={value || ""}
+                            onChange={onChange}
+                            onBlur={onBlur}
+                            className={inputCls(errors?.images?.[i]?.url, "flex-1 min-w-0")}
+                            placeholder="Image URL"
+                          />
+                          <CldUploadWidget
+                            uploadPreset="image_abodbab"
+                            options={{
+                              maxFileSize: 2000000, // 2MB
+                              sources: ["local", "camera"],
+                              styles: {
+                                palette: {
+                                  window: "#07253E",
+                                  windowBorder: "#90A0B3",
+                                  tabIcon: "#0078FF",
+                                  menuIcons: "#5A616A",
+                                  textDark: "#000000",
+                                  textLight: "#FFFFFF",
+                                  link: "#0078FF",
+                                  action: "#FF620C",
+                                  inactiveTabIcon: "#245DA7",
+                                  error: "#F44235",
+                                  inProgress: "#0078FF",
+                                  complete: "#20B832",
+                                  sourceBg: "#000000",
+                                },
+                                fonts: { default: { active: true } },
+                              },
+                            }}
+                            onSuccess={(result) => {
+                              const info = result?.info;
+                              const url =
+                                (info &&
+                                  typeof info === "object" &&
+                                  (info.secure_url || info.url)) ||
+                                "";
+                              if (url) onChange(url);
+                            }}
+                          >
+                            {({ open }) => (
+                              <button
+                                type="button"
+                                onClick={() => open()}
+                                className="px-3 py-1.5 rounded-lg border border-zinc-700 bg-zinc-900/60 hover:bg-zinc-900 text-sm cursor-pointer"
+                              >
+                                Upload
+                              </button>
+                            )}
+                          </CldUploadWidget>
+                        </div>
+                      )}
                     />
+
 
                     <div className="flex gap-1">
                       <button

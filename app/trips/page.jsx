@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
@@ -24,12 +24,16 @@ const item = {
 };
 
 export default function TripsSection() {
+  
+
+  
   const dispatch = useDispatch();
   const { trips, loading, error } = useSelector((state) => state.trips);
 
   const handleTripSelection = (tripId) => {
     // عندما يضغط المستخدم على الرحلة، نقوم بتخزين الـ tripId في Redux
     dispatch(setTripId(tripId));
+
   };
   useEffect(() => {
     // طلب البيانات من الـ API عند تحميل المكون
