@@ -253,7 +253,6 @@ export default function AddTripPageRHF() {
                       )}
                     />
 
-
                     <div className="flex gap-1">
                       <button
                         type="button"
