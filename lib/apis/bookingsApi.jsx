@@ -103,9 +103,10 @@ export async function exportExsl(allBookings) {
   //   createdAt: b.createdAt,
   // }));
 
+
   try {
     const res = await axios.post(
-      "http://localhost:3001/api/bookings/export",
+      "https://abudabbba-backend.vercel.app/api/bookings/export",
       { bookings: allBookings },
       {
         headers: { "Content-Type": "application/json" },
