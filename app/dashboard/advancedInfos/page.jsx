@@ -42,7 +42,7 @@ function Pill({ children, variant = "default", className = "" }) {
   );
 }
 
-function StatCard({ icon: Icon, label, value, sub , className}) {
+function StatCard({ icon: Icon, label, value, sub, className }) {
   return (
     <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4 sm:p-5 shadow-sm">
       <div className="flex items-center gap-3">
@@ -67,21 +67,130 @@ function Toolbar({
   sortBy,
   setSortBy,
   onRefresh,
-  handelSearchTrip,
+  // date props
+  dateMode,
+  setDateMode,
+  day,
+  setDay,
+  month,
+  setMonth,
+  year,
+  setYear,
+  from,
+  setFrom,
+  to,
+  setTo,
+  lastDays,
+  setLastDays,
+  onClearDate,
 }) {
   return (
     <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-3 sm:p-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-wrap">
         <div className="relative">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-zinc-500" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            onKeyUp={() => handelSearchTrip} // تعديل هنا
             placeholder="Search trips…"
             className="pl-9 pr-3 py-2 w-64 rounded-lg border border-zinc-800 bg-zinc-950/60 text-sm outline-none focus:ring-2 focus:ring-zinc-700/50"
           />
         </div>
+
+        {/* Date Filter */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs uppercase tracking-wide text-zinc-400">
+            date
+          </span>
+
+          <div className="relative">
+            <ArrowUpDown className="absolute left-3 top-2.5 h-4 w-4 text-zinc-500" />
+            <select
+              value={dateMode}
+              onChange={(e) => {
+                const v = e.target.value;
+                setDateMode(v);
+                setDay(""); setMonth(""); setYear(""); setFrom(""); setTo(""); setLastDays("");
+              }}
+              className="appearance-none pl-9 pr-8 py-2 rounded-lg border border-zinc-800 bg-zinc-950/60 text-sm outline-none focus:ring-2 focus:ring-zinc-700/50"
+            >
+              <option value="none">All time</option>
+              <option value="day">Day</option>
+              <option value="month">Month</option>
+              <option value="year">Year</option>
+              <option value="range">Range</option>
+              <option value="lastDays">Last N days</option>
+            </select>
+          </div>
+
+          {dateMode === "day" && (
+            <input
+              type="date"
+              value={day}
+              onChange={(e) => setDay(e.target.value)}
+              className="rounded-lg border border-zinc-800 bg-zinc-950/60 px-3 py-2 text-sm"
+            />
+          )}
+
+          {dateMode === "month" && (
+            <input
+              type="month"
+              value={month}
+              onChange={(e) => setMonth(e.target.value)}
+              className="rounded-lg border border-zinc-800 bg-zinc-950/60 px-3 py-2 text-sm"
+            />
+          )}
+
+          {dateMode === "year" && (
+            <input
+              type="number"
+              min="1970"
+              max="2100"
+              placeholder="YYYY"
+              value={year}
+              onChange={(e) => setYear(e.target.value)}
+              className="w-24 rounded-lg border border-zinc-800 bg-zinc-950/60 px-3 py-2 text-sm"
+            />
+          )}
+
+          {dateMode === "range" && (
+            <>
+              <input
+                type="date"
+                value={from}
+                onChange={(e) => setFrom(e.target.value)}
+                className="rounded-lg border border-zinc-800 bg-zinc-950/60 px-3 py-2 text-sm"
+                title="From (inclusive)"
+              />
+              <input
+                type="date"
+                value={to}
+                onChange={(e) => setTo(e.target.value)}
+                className="rounded-lg border border-zinc-800 bg-zinc-950/60 px-3 py-2 text-sm"
+                title="To (inclusive)"
+              />
+            </>
+          )}
+
+          {dateMode === "lastDays" && (
+            <input
+              type="number"
+              min="1"
+              placeholder="e.g. 7"
+              value={lastDays}
+              onChange={(e) => setLastDays(e.target.value)}
+              className="w-24 rounded-lg border border-zinc-800 bg-zinc-950/60 px-3 py-2 text-sm"
+            />
+          )}
+
+          <button
+            onClick={onClearDate}
+            className="rounded-lg border border-zinc-700 bg-zinc-900/60 hover:bg-zinc-900 px-3 py-2 text-sm"
+          >
+            Clear
+          </button>
+        </div>
+
         <button
           onClick={onRefresh}
           className="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-zinc-700 bg-zinc-900/60 hover:bg-zinc-900 text-sm"
@@ -92,29 +201,6 @@ function Toolbar({
       </div>
 
       <div className="flex items-center gap-2">
-        {/* <div className="hidden sm:flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-950/60 p-1">
-          <button
-            onClick={() => setCurrency("EGP")}
-            className={`px-3 py-1.5 rounded-md text-xs ${
-              currency === "EGP"
-                ? "bg-zinc-900 border border-zinc-700 text-zinc-200"
-                : "text-zinc-400"
-            }`}
-          >
-            EGP
-          </button>
-          <button
-            onClick={() => setCurrency("EUR")}
-            className={`px-3 py-1.5 rounded-md text-xs ${
-              currency === "EUR"
-                ? "bg-zinc-900 border border-zinc-700 text-zinc-200"
-                : "text-zinc-400"
-            }`}
-          >
-            EUR
-          </button>
-        </div> */}
-
         <div className="relative">
           <ArrowUpDown className="absolute left-3 top-2.5 h-4 w-4 text-zinc-500" />
           <select
@@ -223,42 +309,69 @@ export default function AdvancedInfosPage() {
   const {
     advancedInfo,
     advancedLoading,
-    advancedError,
     totals,
     totalsLoading,
   } = useSelector((s) => s.bookings);
 
   const [query, setQuery] = useState("");
-
   const [sortBy, setSortBy] = useState("revenue");
 
-  // search filter for trips
-  const handelSearchTrip = useMemo(() => {
-    // تصفية الرحلات بناءً على الاسم (الاستعلام)
-    const sourceTrips = Array.isArray(advancedInfo) ? advancedInfo : [];
-    let filteredTrips = sourceTrips.filter((t) =>
-      t.tripName.toLowerCase().includes(query.toLowerCase())
+  // NEW: تاريخ
+  const [dateMode, setDateMode] = useState("none"); // none | day | month | year | range | lastDays
+  const [day, setDay] = useState("");
+  const [month, setMonth] = useState("");
+  const [year, setYear] = useState("");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [lastDays, setLastDays] = useState("");
+
+  // يبني query params للتاريخ
+  const buildDateParams = () => {
+    const p = {};
+    if (dateMode === "day" && day) p.day = day;
+    else if (dateMode === "month" && month) p.month = month;
+    else if (dateMode === "year" && year) p.year = year;
+    else if (dateMode === "range") {
+      if (from) p.from = from;
+      if (to) p.to = to;
+    } else if (dateMode === "lastDays" && lastDays) p.lastDays = lastDays;
+    return p;
+  };
+
+  // يبني URL كامل مع الـ params
+  const withParams = (base) => {
+    const p = buildDateParams();
+    const qs = new URLSearchParams(p).toString();
+    return qs ? `${base}?${qs}` : base;
+  };
+
+  // جلب البيانات عند فتح الصفحة وأي تغيير في التاريخ
+  useEffect(() => {
+    dispatch(getAdvancedTripInfo(withParams(ADVANCED_URL)));
+    dispatch(getTotalBookingsAndRevenue(withParams(TOTALS_URL)));
+  }, [dispatch, dateMode, day, month, year, from, to, lastDays]);
+
+  // فلترة + ترتيب محلي
+  const filteredTrips = useMemo(() => {
+    const src = Array.isArray(advancedInfo) ? advancedInfo : [];
+    let list = src.filter((t) =>
+      t.tripName?.toLowerCase().includes(query.toLowerCase())
     );
 
-    // ترتيب الرحلات بناءً على القيمة المختارة في sortBy
     if (sortBy === "revenue") {
-      // ترتيب حسب الإيرادات (EGP أو EUR)
-      filteredTrips.sort((a, b) => b.totalEgp - a.totalEgp); // الترتيب حسب الإيرادات بالجنيه المصري
+      list.sort((a, b) => (b.totalEgp ?? 0) - (a.totalEgp ?? 0));
     } else if (sortBy === "bookings") {
-      // ترتيب حسب عدد الرحلات
-      filteredTrips.sort((a, b) => b.totalBookings - a.totalBookings); // الترتيب حسب عدد الرحلات
+      list.sort((a, b) => (b.totalBookings ?? 0) - (a.totalBookings ?? 0));
     } else if (sortBy === "name") {
-      // ترتيب حسب الاسم الأبجدي
-      filteredTrips.sort((a, b) => a.tripName.localeCompare(b.tripName));
+      list.sort((a, b) => (a.tripName || "").localeCompare(b.tripName || ""));
     }
-
-    return filteredTrips;
+    return list;
   }, [query, sortBy, advancedInfo]);
 
-  useEffect(() => {
-    dispatch(getAdvancedTripInfo(ADVANCED_URL));
-    dispatch(getTotalBookingsAndRevenue(TOTALS_URL));
-  }, [dispatch]);
+  const clearDate = () => {
+    setDateMode("none");
+    setDay(""); setMonth(""); setYear(""); setFrom(""); setTo(""); setLastDays("");
+  };
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
@@ -274,7 +387,6 @@ export default function AdvancedInfosPage() {
         </div>
 
         {/* KPIs */}
-        {totalsLoading && <div className="loader"></div>}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <StatCard
             icon={BarChart3}
@@ -290,13 +402,13 @@ export default function AdvancedInfosPage() {
             icon={DollarSign}
             label="Revenue EGP"
             value={fmt(totals?.totalEgp ?? 0)}
-            sub="All-time gross revenue (EGP)"
+            sub={dateMode === "none" ? "All-time gross revenue (EGP)" : "Filtered revenue (EGP)"}
           />
           <StatCard
             icon={Euro}
             label="Revenue EUR"
             value={fmt(totals?.totalEuro ?? 0)}
-            sub="All-time gross revenue (EUR)"
+            sub={dateMode === "none" ? "All-time gross revenue (EUR)" : "Filtered revenue (EUR)"}
           />
         </div>
 
@@ -306,18 +418,33 @@ export default function AdvancedInfosPage() {
           setQuery={setQuery}
           sortBy={sortBy}
           setSortBy={setSortBy}
-          handelSearchTrip={handelSearchTrip}
           onRefresh={() => {
-            dispatch(getAdvancedTripInfo(ADVANCED_URL));
-            dispatch(getTotalBookingsAndRevenue(TOTALS_URL));
+            dispatch(getAdvancedTripInfo(withParams(ADVANCED_URL)));
+            dispatch(getTotalBookingsAndRevenue(withParams(TOTALS_URL)));
           }}
+          // date props
+          dateMode={dateMode}
+          setDateMode={setDateMode}
+          day={day}
+          setDay={setDay}
+          month={month}
+          setMonth={setMonth}
+          year={year}
+          setYear={setYear}
+          from={from}
+          setFrom={setFrom}
+          to={to}
+          setTo={setTo}
+          lastDays={lastDays}
+          setLastDays={setLastDays}
+          onClearDate={clearDate}
         />
 
         {/* List */}
         {advancedLoading ? (
-          <div className="loader"></div>
-        ) : handelSearchTrip?.length ? (
-          handelSearchTrip.map((t) => (
+          <div className="loader" />
+        ) : filteredTrips?.length ? (
+          filteredTrips.map((t) => (
             <TripRow key={t.tripId ?? t._id ?? t.tripName} t={t} />
           ))
         ) : (
@@ -331,12 +458,3 @@ export default function AdvancedInfosPage() {
     </div>
   );
 }
-// import React from 'react'
-
-// const page = () => {
-//   return (
-//     <div>no iam reyad</div>
-//   )
-// }
-
-// export default page

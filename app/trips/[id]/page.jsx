@@ -30,7 +30,7 @@ export default function Page() {
   useEffect(() => {
     async function fetchCurrancyEx() {
       const response = await axios.get(
-        "https://v6.exchangerate-api.com/v6/ffce6030ce59439ae5a1d77c/pair/USD/EGP"
+        "https://v6.exchangerate-api.com/v6/ffce6030ce59439ae5a1d77c/pair/EUR/EGP"
       );
       setCurrancy(response.data.conversion_rate);
     }
@@ -216,7 +216,7 @@ export default function Page() {
                             Adult
                           </label>
                           <p className="text-zinc-300">
-                            Price : {trip?.prices?.adult?.euro ?? 0} $ - (
+                            Price : {trip?.prices?.adult?.euro ?? 0} € - (
                             { egpPriceAdult.toFixed()?? 0} EGP)
                           </p>
                         </div>
@@ -248,7 +248,7 @@ export default function Page() {
                             Child
                           </label>
                           <p className="text-zinc-300">
-                            Price : {trip?.prices?.child?.euro ?? 0} $ - (
+                            Price : {trip?.prices?.child?.euro ?? 0} € - (
                             {egpPriceChild.toFixed() ?? 0} EGP)
                           </p>
                         </div>
@@ -297,7 +297,7 @@ export default function Page() {
 
                       {/* Totals */}
                       <div className="flex items-center justify-between gap-3 rounded-3xl bg-white/5 backdrop-blur ring-1 ring-blue-300/30 px-4 py-3">
-                        Total: {totalEuro} $ / {totalEgp} EGP
+                        Total: {totalEuro} € / {totalEgp} EGP
                       </div>
 
                       <button

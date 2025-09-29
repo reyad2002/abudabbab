@@ -11,13 +11,8 @@ import {
   FiCalendar,
   FiUsers,
 } from "react-icons/fi";
-import {
-  
-  setUserInfo,
-  setTripId,
-  
-} from "../../app/store/bookingSlice";
-import {postBooking,clearBookingState } from '../../lib/apis/bookingsApi'
+import { setUserInfo, setTripId } from "../../app/store/bookingSlice";
+import { postBooking, clearBookingState } from "../../lib/apis/bookingsApi";
 import Link from "next/link";
 import { IoIosArrowForward } from "react-icons/io";
 
@@ -43,11 +38,11 @@ export default function CheckoutSection() {
     reset,
   } = useForm();
 
-    // useEffect(() => {
-    //   return()=>{
-    //      dispatch( clearBookingState())
-    //   }
-    // }, [dispatch]);
+  // useEffect(() => {
+  //   return()=>{
+  //      dispatch( clearBookingState())
+  //   }
+  // }, [dispatch]);
 
   // ---- Submit: save user info, then post booking ----
   const onSubmit = async (data) => {
@@ -313,14 +308,13 @@ export default function CheckoutSection() {
                     All taxes and fees included
                   </p>
                 </div>
-                <p className="text-2xl font-bold tracking-tight">{total}$</p>
+                <p className="text-2xl font-bold tracking-tight">{total}€</p>
               </div>
             </div>
-            <Link href={'/trips'} >
-            <button className="flex justify-center items-center cursor-pointer w-full sm:w-auto rounded-full bg-orange-600 px-6 py-3 font-semibold text-white hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60">
-             <div>Return To Trips</div>  <IoIosArrowForward />
-
-            </button>
+            <Link href={"/trips"}>
+              <button className="flex justify-center items-center cursor-pointer w-full sm:w-auto rounded-full bg-orange-600 px-6 py-3 font-semibold text-white hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60">
+                <div>Return To Trips</div> <IoIosArrowForward />
+              </button>
             </Link>
           </div>
         </aside>

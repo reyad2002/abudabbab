@@ -3,15 +3,16 @@
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
-import { FaEnvelope, FaWhatsapp } from "react-icons/fa"; // Importing WhatsApp icon
+import { FaEnvelope, FaWhatsapp } from "react-icons/fa";
 
 export default function BookingsPage() {
   const dispatch = useDispatch();
   const { list } = useSelector((s) => s.bookings);
+
   const [q, setQ] = useState("");
   const [searchField, setSearchField] = useState("firstName");
   const [transferFilter, setTransferFilter] = useState("all");
-  const [sort, setSort] = useState("recent");
+  const [sort, setSort] = useState("desc"); // NEW: خلي الافتراضي desc
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(8);
   const [allBookings, setAllBookings] = useState([]);
@@ -19,10 +20,46 @@ export default function BookingsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
 
+  // NEW — حالات فلتر التاريخ
+  const [dateMode, setDateMode] = useState("none"); // none | day | month | year | range | lastDays
+  const [day, setDay] = useState(""); // YYYY-MM-DD
+  const [month, setMonth] = useState(""); // YYYY-MM
+  const [year, setYear] = useState(""); // YYYY
+  const [from, setFrom] = useState(""); // YYYY-MM-DD
+  const [to, setTo] = useState(""); // YYYY-MM-DD
+  const [lastDays, setLastDays] = useState(""); // number
+
+  // NEW — دالة تبني بارامترات التاريخ حسب المود
+  const buildDateParams = () => {
+    const p = {};
+    switch (dateMode) {
+      case "day":
+        if (day) p.day = day;
+        break;
+      case "month":
+        if (month) p.month = month;
+        break;
+      case "year":
+        if (year) p.year = year;
+        break;
+      case "range":
+        if (from) p.from = from;
+        if (to) p.to = to;
+        break;
+      case "lastDays":
+        if (lastDays) p.lastDays = lastDays;
+        break;
+      default:
+        // none
+        break;
+    }
+    return p;
+  };
+
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        // بناء الـ query string بناءً على الفلاتر
+        // بناء الـ query string بناءً على كل الفلاتر (بما فيها التاريخ)
         const params = {
           page,
           limit,
@@ -30,44 +67,70 @@ export default function BookingsPage() {
           q,
           searchField,
           transferFilter,
+          ...buildDateParams(), // NEW
         };
-  
+
         const response = await axios.get(
-          `https://abudabbba-backend.vercel.app/api/bookings/admin`, {
-            params, // إرسال الفلاتر كـ query parameters
-          }
+          `https://abudabbba-backend.vercel.app/api/bookings/admin`,
+          { params }
         );
-        if(response.data.bookings?.length === 0 ){
-          setPage(0)
+
+        if (response.data.bookings?.length === 0 && page > 1) {
+          // اختياري: لو الصفحة الحالية فاضية ارجع لأول صفحة
+          setPage(1);
         }
-        setAllBookings(response.data.bookings); // حفظ البيانات
-        setTotalBookings(response.data.totalBookings); // حفظ العدد الإجمالي
+
+        setAllBookings(response.data.bookings || []);
+        setTotalBookings(response.data.totalBookings || 0);
       } catch (error) {
         console.error("Error fetching bookings:", error);
       }
     };
-  
+
     fetchBookings();
-  }, [page, q, searchField, transferFilter, sort, limit]); // إضافة الفلاتر كـ dependencies
-  
-  
+    // NEW: زودنا توابع التاريخ في الـ deps
+  }, [
+    page,
+    q,
+    searchField,
+    transferFilter,
+    sort,
+    limit,
+    dateMode,
+    day,
+    month,
+    year,
+    from,
+    to,
+    lastDays,
+  ]);
 
   const resetToFirst = () => setPage(1);
 
-  const totalPages = Math.ceil(totalBookings / limit);
+  const totalPages = Math.max(1, Math.ceil(totalBookings / limit)); // اختياري: ما تنزلش عن 1
   const openModal = (booking) => {
     setSelectedBooking(booking);
     setIsModalOpen(true);
   };
-
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedBooking(null);
   };
 
+  // NEW — دالة مساعدة لمسح فلاتر التاريخ
+  const clearDateFilters = () => {
+    setDateMode("none");
+    setDay("");
+    setMonth("");
+    setYear("");
+    setFrom("");
+    setTo("");
+    setLastDays("");
+    resetToFirst();
+  };
+
   return (
     <div className="min-h-screen bg-neutral-900 text-neutral-200">
-      {/* Content */}
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-lg font-semibold tracking-wide">
           TOTAL BOOKINGS : {totalBookings}
@@ -110,7 +173,7 @@ export default function BookingsPage() {
             </div>
           </div>
 
-          {/* Filter */}
+          {/* Transfer Filter */}
           <div className="flex items-center gap-2">
             <span className="text-xs uppercase tracking-wide text-neutral-400">
               filter
@@ -144,12 +207,9 @@ export default function BookingsPage() {
             >
               <option value="desc">Newest</option>
               <option value="asc">Oldest</option>
-              {/* <option value="nameAsc">Name A → Z</option>
-              <option value="nameDesc">Name Z → A</option> */}
             </select>
           </div>
           {/* Pagination */}
-
           <div className="flex items-center gap-2 justify-end">
             <PageBtn disabled={page <= 1} onClick={() => setPage(page - 1)}>
               Prev
@@ -158,11 +218,125 @@ export default function BookingsPage() {
               {page} / {totalPages}
             </span>
             <PageBtn
-              disabled={page === totalPages}
+              disabled={page >= totalPages}
               onClick={() => setPage(page + 1)}
             >
               Next
             </PageBtn>
+          </div>
+          {/* NEW — Date Filter */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs uppercase tracking-wide text-neutral-400">
+              date
+            </span>
+
+            <select
+              value={dateMode}
+              onChange={(e) => {
+                const v = e.target.value;
+                setDateMode(v);
+                setDay("");
+                setMonth("");
+                setYear("");
+                setFrom("");
+                setTo("");
+                setLastDays("");
+                resetToFirst();
+              }}
+              className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
+            >
+              <option value="none">All time</option>
+              <option value="day">Day</option>
+              <option value="month">Month</option>
+              <option value="year">Year</option>
+              <option value="range">Range</option>
+              <option value="lastDays">Last N days</option>
+            </select>
+
+            {dateMode === "day" && (
+              <input
+                type="date"
+                value={day}
+                onChange={(e) => {
+                  setDay(e.target.value);
+                  resetToFirst();
+                }}
+                className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
+              />
+            )}
+
+            {dateMode === "month" && (
+              <input
+                type="month"
+                value={month}
+                onChange={(e) => {
+                  setMonth(e.target.value);
+                  resetToFirst();
+                }}
+                className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
+              />
+            )}
+
+            {dateMode === "year" && (
+              <input
+                type="number"
+                min="1970"
+                max="2100"
+                placeholder="YYYY"
+                value={year}
+                onChange={(e) => {
+                  setYear(e.target.value);
+                  resetToFirst();
+                }}
+                className="w-24 rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
+              />
+            )}
+
+            {dateMode === "range" && (
+              <>
+                <input
+                  type="date"
+                  value={from}
+                  onChange={(e) => {
+                    setFrom(e.target.value);
+                    resetToFirst();
+                  }}
+                  className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
+                  title="From (inclusive)"
+                />
+                <input
+                  type="date"
+                  value={to}
+                  onChange={(e) => {
+                    setTo(e.target.value);
+                    resetToFirst();
+                  }}
+                  className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
+                  title="To (inclusive)"
+                />
+              </>
+            )}
+
+            {dateMode === "lastDays" && (
+              <input
+                type="number"
+                min="1"
+                placeholder="e.g. 7"
+                value={lastDays}
+                onChange={(e) => {
+                  setLastDays(e.target.value);
+                  resetToFirst();
+                }}
+                className="w-24 rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
+              />
+            )}
+
+            <button
+              onClick={clearDateFilters}
+              className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 hover:bg-neutral-800/60"
+            >
+              Clear
+            </button>
           </div>
         </div>
 
@@ -174,10 +348,7 @@ export default function BookingsPage() {
                 <tr>
                   <Th>User name</Th>
                   <Th>phone</Th>
-                  {/* <Th>email</Th> */}
                   <Th>Trip name</Th>
-                  {/* <Th>Adult num</Th>
-                  <Th>Child num</Th> */}
                   <Th>transfer</Th>
                   <Th>booking date</Th>
                   <Th>Created At</Th>
@@ -185,7 +356,6 @@ export default function BookingsPage() {
                 </tr>
               </thead>
               <tbody>
-                {}
                 {allBookings?.length === 0 ? (
                   <tr>
                     <td
@@ -216,21 +386,12 @@ export default function BookingsPage() {
                         </a>
                         {r.user.phone}
                       </Td>
-                      {/* <Td className="truncate max-w-[220px] ">  <a
-                          href={`mailto:${r.user.email}`}
-                          className="text-blue-500 hover:text-blue-400"
-                          title="Send email"
-                        >
-                          <FaEnvelope />
-                        </a>{r.user.email}</Td> */}
                       <Td>{r?.tripInfo?.name}</Td>
-                      {/* <Td>{r.adult}</Td>
-                      <Td>{r.child}</Td> */}
                       <Td>
                         <span
                           className={[
                             "inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium",
-                            r.transportation == true
+                            r.transportation === true
                               ? "bg-emerald-600/20 text-emerald-300 ring-1 ring-emerald-700/40"
                               : "bg-neutral-700/30 text-neutral-300 ring-1 ring-neutral-700/50",
                           ].join(" ")}
@@ -239,10 +400,19 @@ export default function BookingsPage() {
                         </span>
                       </Td>
                       <Td className="whitespace-nowrap">
-                        {new Date(r.bookingDate).toLocaleDateString()}
+                        {new Date(r.bookingDate).toLocaleDateString("en-GB", {
+                          timeZone: "Africa/Cairo",
+                        })}
                       </Td>
                       <Td className="whitespace-nowrap">
-                        {new Date(r.createdAt).toLocaleDateString()}
+                        {new Date(r.createdAt).toLocaleString("en-GB", {
+                          timeZone: "Africa/Cairo",
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                       </Td>
                       <Td className="px-4 py-4">
                         <button
@@ -260,24 +430,6 @@ export default function BookingsPage() {
           </div>
         </div>
 
-        {/* Pagination */}
-        {/* <div className="mt-6 flex items-center justify-center gap-2">
-          <PageBtn
-            disabled={page === 1}
-            onClick={() => setPage(page - 1)}
-          >
-            Prev
-          </PageBtn>
-          <span className="text-sm text-neutral-400">
-            {page} / {totalPages}
-          </span>
-          <PageBtn
-            disabled={page === totalPages}
-            onClick={() => setPage(page + 1)}
-          >
-            Next
-          </PageBtn>
-        </div> */}
         {/* Modal */}
         {isModalOpen && selectedBooking && (
           <div className="fixed inset-0 bg-black/30 bg-opacity-50 flex justify-center items-center z-50 transition-all duration-300 ease-in-out">
@@ -286,7 +438,6 @@ export default function BookingsPage() {
                 Booking Details
               </h2>
 
-              {/* User Information */}
               <div className="mb-6">
                 <h3 className="font-semibold text-lg mb-2">User Information</h3>
                 <div className="space-y-2">
@@ -294,9 +445,8 @@ export default function BookingsPage() {
                     <strong>Name:</strong> {selectedBooking.user.firstName}{" "}
                     {selectedBooking.user.lastName}
                   </p>
-                  <div>
-                    <div className="flex gap-2  items-center">
-                    <strong>Email:</strong>{" "}
+                  <div className="flex gap-2 items-center">
+                    <strong>Email:</strong>
                     <a
                       href={`mailto:${selectedBooking.user.email}`}
                       className="text-blue-500 hover:text-blue-400"
@@ -304,9 +454,7 @@ export default function BookingsPage() {
                     >
                       <FaEnvelope />
                     </a>
-
                     <p>{selectedBooking.user.email}</p>
-                    </div>
                   </div>
                   <p>
                     <strong>Phone:</strong> {selectedBooking.user.phone}
@@ -317,17 +465,18 @@ export default function BookingsPage() {
                 </div>
               </div>
 
-              {/* Trip Information */}
               <div className="mb-6">
                 <h3 className="font-semibold text-lg mb-2">Trip Information</h3>
                 <div className="space-y-2">
                   <p>
                     <strong>Trip Name:</strong> {selectedBooking.tripInfo?.name}
                   </p>
-                 
                   <p>
                     <strong>Booking Date:</strong>{" "}
-                    {new Date(selectedBooking.bookingDate).toLocaleDateString()}
+                    {new Date(selectedBooking.bookingDate).toLocaleDateString(
+                      "en-GB",
+                      { timeZone: "Africa/Cairo" }
+                    )}
                   </p>
                   <p>
                     <strong>Transportation:</strong>{" "}
@@ -336,7 +485,6 @@ export default function BookingsPage() {
                 </div>
               </div>
 
-              {/* Close Button */}
               <div className="flex justify-center">
                 <button
                   onClick={closeModal}
