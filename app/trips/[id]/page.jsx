@@ -93,7 +93,7 @@ export default function Page() {
       Number(egpPriceAdult.toFixed() || 0) * adult +
       Number(egpPriceChild.toFixed() || 0) * child
     );
-  }, [trip, adult, child]);
+  }, [trip, adult, child, currancy]);
 
   const totalEuro = useMemo(() => {
     if (!trip) return 0;
@@ -101,7 +101,7 @@ export default function Page() {
       Number(trip?.prices?.adult?.euro || 0) * adult +
       Number(trip?.prices?.child?.euro || 0) * child
     );
-  }, [trip, adult, child]);
+  }, [trip, adult, child, currancy]);
 
   const onSubmit = (data) => {
     if (!trip) return;

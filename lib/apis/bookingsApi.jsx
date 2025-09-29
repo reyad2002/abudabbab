@@ -103,7 +103,6 @@ export async function exportExsl(allBookings) {
   //   createdAt: b.createdAt,
   // }));
 
-
   try {
     const res = await axios.post(
       "https://abudabbba-backend.vercel.app/api/bookings/export",
@@ -135,5 +134,4 @@ export async function exportExsl(allBookings) {
   } catch (error) {
     console.error("Export error:", error);
   }
-
 }
