@@ -360,32 +360,32 @@ export default function AddTripPageRHF() {
             <div className="mt-4 grid sm:grid-cols-2 gap-3">
               <PriceGroup
                 legend="Adult"
-                egpReg={register("prices.adult.egp", {
-                  required: "Required",
-                  min: { value: 0, message: ">= 0" },
-                  valueAsNumber: true,
-                })}
+                // egpReg={register("prices.adult.egp", {
+                //   required: "Required",
+                //   min: { value: 0, message: ">= 0" },
+                //   valueAsNumber: true,
+                // })}
                 euroReg={register("prices.adult.euro", {
                   required: "Required",
                   min: { value: 0, message: ">= 0" },
                   valueAsNumber: true,
                 })}
-                egpError={errors?.prices?.adult?.egp?.message}
+                // egpError={errors?.prices?.adult?.egp?.message}
                 euroError={errors?.prices?.adult?.euro?.message}
               />
               <PriceGroup
                 legend="Child"
-                egpReg={register("prices.child.egp", {
-                  required: "Required",
-                  min: { value: 0, message: ">= 0" },
-                  valueAsNumber: true,
-                })}
+                // egpReg={register("prices.child.egp", {
+                //   required: "Required",
+                //   min: { value: 0, message: ">= 0" },
+                //   valueAsNumber: true,
+                // })}
                 euroReg={register("prices.child.euro", {
                   required: "Required",
                   min: { value: 0, message: ">= 0" },
                   valueAsNumber: true,
                 })}
-                egpError={errors?.prices?.child?.egp?.message}
+                // egpError={errors?.prices?.child?.egp?.message}
                 euroError={errors?.prices?.child?.euro?.message}
               />
             </div>
@@ -490,10 +490,10 @@ function PriceGroup({ legend, egpReg, euroReg, egpError, euroError }) {
     <fieldset className="rounded-xl border border-zinc-800 p-3">
       <legend className="px-1 text-xs text-zinc-400">{legend} price</legend>
       <div className="grid grid-cols-2 gap-2">
-        <div>
+        {/* <div>
           <input className={inputCls(egpError)} placeholder="EGP" {...egpReg} />
           {egpError && <p className="mt-1 text-rose-300 text-xs">{egpError}</p>}
-        </div>
+        </div> */}
         <div>
           <input
             className={inputCls(euroError)}

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchTripsData } from "../../lib/apis/tripsApi"; // استيراد الـ action
 import { setTripId } from "../store/bookingSlice";
+import axios from "axios";
 
 const container = {
   hidden: { opacity: 0 },
@@ -24,16 +25,12 @@ const item = {
 };
 
 export default function TripsSection() {
-  
-
-  
   const dispatch = useDispatch();
   const { trips, loading, error } = useSelector((state) => state.trips);
 
   const handleTripSelection = (tripId) => {
     // عندما يضغط المستخدم على الرحلة، نقوم بتخزين الـ tripId في Redux
     dispatch(setTripId(tripId));
-
   };
   useEffect(() => {
     // طلب البيانات من الـ API عند تحميل المكون
@@ -91,11 +88,14 @@ export default function TripsSection() {
           viewport={{ once: true, amount: 0.2 }}
         >
           {trips.map((t) => (
-
             <motion.article
               key={t._id}
               variants={item}
-              className={t.isActive !== true ? "hidden" : "group relative snap-center lg:snap-none rounded-xl border border-slate-200 bg-white shadow-sm transition"}
+              className={
+                t.isActive !== true
+                  ? "hidden"
+                  : "group relative snap-center lg:snap-none rounded-xl border border-slate-200 bg-white shadow-sm transition"
+              }
               whileHover={{ y: -6, boxShadow: "0 20px 40px rgba(2,6,23,0.08)" }}
               whileTap={{ scale: 0.99 }}
             >

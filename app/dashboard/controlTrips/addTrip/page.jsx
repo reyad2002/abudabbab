@@ -3,9 +3,11 @@
 import { CldUploadWidget } from "next-cloudinary";
 import { postTrip } from "../../../../lib/apis/tripsApi";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { useDispatch } from "react-redux";
+import { Field, PriceGroup, Section, inputCls } from "@/lib/helpers/helpers";
+import axios from "axios";
 
 export default function AddTripPageRHF() {
   const dispatch = useDispatch();
@@ -104,7 +106,17 @@ export default function AddTripPageRHF() {
     // alert("Trip created ✅");
     // reset();
   };
-
+  // const [currancy, setCurrancy] = useState("");
+  // useEffect(() => {
+  //   async function fetchCurrancyEx() {
+  //     const response = await axios.get(
+  //       "https://v6.exchangerate-api.com/v6/ffce6030ce59439ae5a1d77c/pair/USD/EGP"
+  //     );
+  //     setCurrancy(response.data.conversion_rate);
+  //   }
+  //   fetchCurrancyEx();
+  // }, []);
+  // console.log(currancy);
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
       <main className="max-w-6xl mx-auto px-4 py-8">
@@ -190,8 +202,7 @@ export default function AddTripPageRHF() {
                       })}
                     /> */}
 
-
-        <Controller
+                    <Controller
                       control={control}
                       name={`images.${i}.url`}
                       rules={{ required: "URL required" }}
@@ -202,7 +213,10 @@ export default function AddTripPageRHF() {
                             value={value || ""}
                             onChange={onChange}
                             onBlur={onBlur}
-                            className={inputCls(errors?.images?.[i]?.url, "flex-1 min-w-0")}
+                            className={inputCls(
+                              errors?.images?.[i]?.url,
+                              "flex-1 min-w-0"
+                            )}
                             placeholder="Image URL"
                           />
                           <CldUploadWidget
@@ -389,32 +403,32 @@ export default function AddTripPageRHF() {
             <div className="mt-4 grid sm:grid-cols-2 gap-3">
               <PriceGroup
                 legend="Adult"
-                egpReg={register("prices.adult.egp", {
-                  required: "Required",
-                  min: { value: 0, message: ">= 0" },
-                  valueAsNumber: true,
-                })}
+                // egpReg={register("prices.adult.egp", {
+                //   required: "Required",
+                //   min: { value: 0, message: ">= 0" },
+                //   valueAsNumber: true,
+                // })}
                 euroReg={register("prices.adult.euro", {
                   required: "Required",
                   min: { value: 0, message: ">= 0" },
                   valueAsNumber: true,
                 })}
-                egpError={errors?.prices?.adult?.egp?.message}
+                // egpError={errors?.prices?.adult?.egp?.message}
                 euroError={errors?.prices?.adult?.euro?.message}
               />
               <PriceGroup
                 legend="Child"
-                egpReg={register("prices.child.egp", {
-                  required: "Required",
-                  min: { value: 0, message: ">= 0" },
-                  valueAsNumber: true,
-                })}
+                // egpReg={register("prices.child.egp", {
+                //   required: "Required",
+                //   min: { value: 0, message: ">= 0" },
+                //   valueAsNumber: true,
+                // })}
                 euroReg={register("prices.child.euro", {
                   required: "Required",
                   min: { value: 0, message: ">= 0" },
                   valueAsNumber: true,
                 })}
-                egpError={errors?.prices?.child?.egp?.message}
+                // egpError={errors?.prices?.child?.egp?.message}
                 euroError={errors?.prices?.child?.euro?.message}
               />
             </div>
@@ -452,64 +466,4 @@ export default function AddTripPageRHF() {
       <div className="pointer-events-none fixed inset-4 rounded-3xl border border-zinc-800/80" />
     </div>
   );
-}
-
-/* ---------- UI helpers ---------- */
-function Section({ title, children }) {
-  return (
-    <section className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4 sm:p-5">
-      <h2 className="text-sm font-semibold mb-3 tracking-wide text-zinc-200">
-        {title}
-      </h2>
-      {children}
-    </section>
-  );
-}
-
-function Field({ label, error, children }) {
-  return (
-    <label className="block">
-      <div className="mb-1">
-        <span className="text-xs uppercase tracking-wide text-zinc-400">
-          {label}
-        </span>
-      </div>
-      {children}
-      {error && <p className="mt-1 text-rose-300 text-xs">{error}</p>}
-    </label>
-  );
-}
-
-function PriceGroup({ legend, egpReg, euroReg, egpError, euroError }) {
-  return (
-    <fieldset className="rounded-xl border border-zinc-800 p-3">
-      <legend className="px-1 text-xs text-zinc-400">{legend} price</legend>
-      <div className="grid grid-cols-2 gap-2">
-        <div>
-          <input className={inputCls(egpError)} placeholder="EGP" {...egpReg} />
-          {egpError && <p className="mt-1 text-rose-300 text-xs">{egpError}</p>}
-        </div>
-        <div>
-          <input
-            className={inputCls(euroError)}
-            placeholder="EUR"
-            {...euroReg}
-          />
-          {euroError && (
-            <p className="mt-1 text-rose-300 text-xs">{euroError}</p>
-          )}
-        </div>
-      </div>
-    </fieldset>
-  );
-}
-
-function inputCls(hasError, extra = "") {
-  return [
-    "w-full rounded-lg border bg-zinc-950/60 px-3 py-2 text-sm outline-none transition",
-    hasError
-      ? "border-rose-700 focus:ring-2 focus:ring-rose-700/50"
-      : "border-zinc-800 focus:ring-2 focus:ring-zinc-700/50",
-    extra,
-  ].join(" ");
 }

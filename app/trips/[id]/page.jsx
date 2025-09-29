@@ -26,7 +26,17 @@ export default function Page() {
   const { id } = useParams();
   const router = useRouter();
   const dispatch = useDispatch();
-
+  const [currancy, setCurrancy] = useState("");
+  useEffect(() => {
+    async function fetchCurrancyEx() {
+      const response = await axios.get(
+        "https://v6.exchangerate-api.com/v6/ffce6030ce59439ae5a1d77c/pair/USD/EGP"
+      );
+      setCurrancy(response.data.conversion_rate);
+    }
+    fetchCurrancyEx();
+  }, []);
+  // console.log(currancy);
   const tripsInStore = useSelector((s) => s.trips.trips);
   const booking = useSelector((s) => s.bookings);
 
@@ -35,7 +45,8 @@ export default function Page() {
   );
   const [loading, setLoading] = useState(!trip);
   const [err, setErr] = useState(null);
-
+  const egpPriceAdult = trip?.prices?.adult?.euro * currancy
+  const egpPriceChild = trip?.prices?.child?.euro * currancy
   // fallback fetch by id on reload
   useEffect(() => {
     const fromStore = tripsInStore.find((t) => String(t._id) === String(id));
@@ -45,6 +56,7 @@ export default function Page() {
       return;
     }
 
+   
     let mounted = true;
     (async () => {
       try {
@@ -78,8 +90,8 @@ export default function Page() {
   const totalEgp = useMemo(() => {
     if (!trip) return 0;
     return (
-      Number(trip?.prices?.adult?.egp || 0) * adult +
-      Number(trip?.prices?.child?.egp || 0) * child
+      Number(egpPriceAdult.toFixed() || 0) * adult +
+      Number(egpPriceChild.toFixed() || 0) * child
     );
   }, [trip, adult, child]);
 
@@ -205,7 +217,7 @@ export default function Page() {
                           </label>
                           <p className="text-zinc-300">
                             Price : {trip?.prices?.adult?.euro ?? 0} $ - (
-                            {trip?.prices?.adult?.egp ?? 0} EGP)
+                            { egpPriceAdult.toFixed()?? 0} EGP)
                           </p>
                         </div>
                         <input
@@ -237,7 +249,7 @@ export default function Page() {
                           </label>
                           <p className="text-zinc-300">
                             Price : {trip?.prices?.child?.euro ?? 0} $ - (
-                            {trip?.prices?.child?.egp ?? 0} EGP)
+                            {egpPriceChild.toFixed() ?? 0} EGP)
                           </p>
                         </div>
                         <input

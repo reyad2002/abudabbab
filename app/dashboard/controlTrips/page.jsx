@@ -177,7 +177,7 @@ export default function DashboardTrips() {
 
         {/* List */}
         {!loading && !error && trips.map((trip) => (
-          <TripCard key={trip._id} trip={trip} onDelete={handleDelete} />
+          <TripCard key={trip?._id} trip={trip} onDelete={handleDelete} />
         ))}
       </main>
 
