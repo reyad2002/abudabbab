@@ -4,6 +4,7 @@ import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import { FaEnvelope, FaWhatsapp } from "react-icons/fa";
+import { exportExsl } from "@/lib/apis/bookingsApi";
 
 export default function BookingsPage() {
   const dispatch = useDispatch();
@@ -89,21 +90,22 @@ export default function BookingsPage() {
 
     fetchBookings();
     // NEW: زودنا توابع التاريخ في الـ deps
-  }, [
-    page,
-    q,
-    searchField,
-    transferFilter,
-    sort,
-    limit,
-    dateMode,
-    day,
-    month,
-    year,
-    from,
-    to,
-    lastDays,
-  ]);
+  },
+    [
+      page,
+      q,
+      searchField,
+      transferFilter,
+      sort,
+      limit,
+      dateMode,
+      day,
+      month,
+      year,
+      from,
+      to,
+      lastDays,
+    ]);
 
   const resetToFirst = () => setPage(1);
 
@@ -128,6 +130,32 @@ export default function BookingsPage() {
     setLastDays("");
     resetToFirst();
   };
+
+
+  // NEW — دالة تصدير البيانات إلى إكسل
+
+  const ExportToExcel = async () => {
+    try {
+
+      const arrayBuffer = await exportExsl(allBookings);
+      const blob = new Blob([arrayBuffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download =
+        res.headers
+          .get("Content-Disposition")
+          ?.match(/filename="(.+)"/)?.[1] ?? "bookings.xlsx";
+      a.click();
+
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Export error:", error);
+    }
+  }
 
   return (
     <div className="min-h-screen bg-neutral-900 text-neutral-200">
@@ -337,6 +365,12 @@ export default function BookingsPage() {
             >
               Clear
             </button>
+            <button
+              onClick={() => exportExsl(allBookings)}
+              className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 hover:bg-neutral-800/60"
+            >
+              Export Excel
+            </button>
           </div>
         </div>
 
@@ -374,9 +408,8 @@ export default function BookingsPage() {
                       <Td>{r.user.firstName}</Td>
                       <Td className="whitespace-nowrap flex items-center gap-2">
                         <a
-                          href={`https://wa.me/${
-                            "+20" + r.user.phone.replace(/\D/g, "")
-                          }`}
+                          href={`https://wa.me/${"+20" + r.user.phone.replace(/\D/g, "")
+                            }`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-green-500 hover:text-green-400"
