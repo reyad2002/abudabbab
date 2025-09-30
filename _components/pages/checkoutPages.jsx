@@ -96,7 +96,7 @@ export default function CheckoutSection() {
   const adultPriceEuro = selectedTrip?.prices?.adult?.euro ?? 0;
   const childPriceEuro = selectedTrip?.prices?.child?.euro ?? 0;
   const transferFee = bookingState?.bookingDetails?.transfer ? 25 : 0;
-
+  console.log(bookingState);
   // Use total price from booking details if available, otherwise calculate
   const total =
     bookingState?.bookingDetails?.totalPrice?.euro ??

@@ -42,6 +42,7 @@ export const postBooking = createAsyncThunk(
           phone: b?.userInfo?.phone || "",
           message: b?.userInfo?.message || "",
         },
+        payment: Boolean(b?.bookingDetails?.payment ?? false),
         ...(bookingDate ? { bookingDate } : {}),
       };
 

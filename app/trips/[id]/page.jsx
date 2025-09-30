@@ -110,6 +110,7 @@ export default function Page() {
         adult: Number(data.adult),
         child: Number(data.child),
         transfer: !!data.transfer,
+        payment: !!data.payment,
         bookingDate: data.date, // normalized
         totalPrice: { egp: totalEgp, euro: totalEuro },
         tripId: trip._id,
@@ -292,6 +293,21 @@ export default function Page() {
                           className="text-[15px] font-bold text-white"
                         >
                           Required transfer
+                        </label>
+                      </div>
+                      {/* payment */}
+                      <div className="flex items-center gap-3 px-2 py-1 rounded-3xl">
+                        <input
+                          {...register("payment")}
+                          type="checkbox"
+                          id="payment"
+                          className="w-5 h-5 accent-blue-400 rounded-sm border border-blue-300/40 bg-black/40"
+                        />
+                        <label
+                          htmlFor="payment"
+                          className="text-[15px] font-bold text-white"
+                        >
+                         Payment Completed
                         </label>
                       </div>
 
