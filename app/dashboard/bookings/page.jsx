@@ -20,7 +20,7 @@ export default function BookingsPage() {
   const [totalBookings, setTotalBookings] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
-
+  console.log(selectedBooking);
   // NEW — حالات فلتر التاريخ
   const [dateMode, setDateMode] = useState("none"); // none | day | month | year | range | lastDays
   const [day, setDay] = useState(""); // YYYY-MM-DD
@@ -90,22 +90,21 @@ export default function BookingsPage() {
 
     fetchBookings();
     // NEW: زودنا توابع التاريخ في الـ deps
-  },
-    [
-      page,
-      q,
-      searchField,
-      transferFilter,
-      sort,
-      limit,
-      dateMode,
-      day,
-      month,
-      year,
-      from,
-      to,
-      lastDays,
-    ]);
+  }, [
+    page,
+    q,
+    searchField,
+    transferFilter,
+    sort,
+    limit,
+    dateMode,
+    day,
+    month,
+    year,
+    from,
+    to,
+    lastDays,
+  ]);
 
   const resetToFirst = () => setPage(1);
 
@@ -131,12 +130,10 @@ export default function BookingsPage() {
     resetToFirst();
   };
 
-
   // NEW — دالة تصدير البيانات إلى إكسل
 
   const ExportToExcel = async () => {
     try {
-
       const arrayBuffer = await exportExsl(allBookings);
       const blob = new Blob([arrayBuffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -146,16 +143,15 @@ export default function BookingsPage() {
       const a = document.createElement("a");
       a.href = url;
       a.download =
-        res.headers
-          .get("Content-Disposition")
-          ?.match(/filename="(.+)"/)?.[1] ?? "bookings.xlsx";
+        res.headers.get("Content-Disposition")?.match(/filename="(.+)"/)?.[1] ??
+        "bookings.xlsx";
       a.click();
 
       URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Export error:", error);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-neutral-900 text-neutral-200">
@@ -384,6 +380,8 @@ export default function BookingsPage() {
                   <Th>phone</Th>
                   <Th>Trip name</Th>
                   <Th>transfer</Th>
+                  <Th>Adult num</Th>
+                  <Th>child num</Th>
                   <Th>booking date</Th>
                   <Th>Created At</Th>
                   <Th>more info</Th>
@@ -408,8 +406,9 @@ export default function BookingsPage() {
                       <Td>{r.user.firstName}</Td>
                       <Td className="whitespace-nowrap flex items-center gap-2">
                         <a
-                          href={`https://wa.me/${"+20" + r.user.phone.replace(/\D/g, "")
-                            }`}
+                          href={`https://wa.me/${
+                            "+20" + r.user.phone.replace(/\D/g, "")
+                          }`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-green-500 hover:text-green-400"
@@ -432,6 +431,9 @@ export default function BookingsPage() {
                           {r.transportation ? "Yes" : "No"}
                         </span>
                       </Td>
+                      <Td>{r.adult}</Td>
+                      <Td>{r.child}</Td>
+
                       <Td className="whitespace-nowrap">
                         {new Date(r.bookingDate).toLocaleDateString("en-GB", {
                           timeZone: "Africa/Cairo",
@@ -464,71 +466,310 @@ export default function BookingsPage() {
         </div>
 
         {/* Modal */}
-        {isModalOpen && selectedBooking && (
-          <div className="fixed inset-0 bg-black/30 bg-opacity-50 flex justify-center items-center z-50 transition-all duration-300 ease-in-out">
-            <div className="bg-neutral-900 text-neutral-200 p-8 rounded-2xl w-4/5 sm:w-1/2 max-w-3xl shadow-lg transform transition-transform duration-300 ease-in-out">
-              <h2 className="text-2xl font-semibold mb-6 text-center">
-                Booking Details
-              </h2>
+       {/* Modal */}
+{isModalOpen && selectedBooking && (
+  <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 backdrop-blur-sm p-4">
+    <div
+      role="dialog"
+      aria-modal="true"
+      className="w-full max-w-5xl rounded-2xl bg-neutral-900 text-neutral-100 shadow-2xl ring-1 ring-white/10 overflow-hidden"
+    >
+      {/* Header ثابت */}
+      <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
+        <h2 className="text-xl sm:text-2xl font-semibold">Booking Details</h2>
+        <button
+          onClick={closeModal}
+          className="inline-flex items-center gap-2 rounded-full px-4 py-2 bg-red-600 hover:bg-red-700 transition focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 focus:ring-offset-neutral-900"
+        >
+          Close
+        </button>
+      </div>
 
-              <div className="mb-6">
-                <h3 className="font-semibold text-lg mb-2">User Information</h3>
-                <div className="space-y-2">
-                  <p>
-                    <strong>Name:</strong> {selectedBooking.user.firstName}{" "}
-                    {selectedBooking.user.lastName}
-                  </p>
-                  <div className="flex gap-2 items-center">
-                    <strong>Email:</strong>
-                    <a
-                      href={`mailto:${selectedBooking.user.email}`}
-                      className="text-blue-500 hover:text-blue-400"
-                      title="Send email"
-                    >
-                      <FaEnvelope />
-                    </a>
-                    <p>{selectedBooking.user.email}</p>
-                  </div>
-                  <p>
-                    <strong>Phone:</strong> {selectedBooking.user.phone}
-                  </p>
-                  <p>
-                    <strong>Message:</strong> {selectedBooking.user.message}
-                  </p>
-                </div>
-              </div>
+      {/* جسم المودال مع أقصى ارتفاع + Scroll عام لو المحتوى كتير */}
+      <div className="px-6 py-5 max-h-[80vh] overflow-y-auto">
+        {/* Grid أنضف + نفس الارتفاع للكروت */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch auto-rows-fr">
+          {/* ===== Card 1: User Information ===== */}
+          <section className="h-full overflow-hidden rounded-2xl bg-white/80 text-neutral-900 ring-1 ring-black/5 shadow-sm flex flex-col">
+            <header className="px-4 pt-4">
+              <h3 className="text-lg font-semibold text-[#003cff]">User Information</h3>
+            </header>
+            {/* جزء المحتوى بيتمدّد ويعمل Scroll لو زاد */}
+            <div className="px-4 pb-4 pt-2 space-y-2 grow overflow-y-auto">
+              <p>
+                <strong>Name:</strong> {selectedBooking.user.firstName}{" "}
+                {selectedBooking.user.lastName}
+              </p>
 
-              <div className="mb-6">
-                <h3 className="font-semibold text-lg mb-2">Trip Information</h3>
-                <div className="space-y-2">
-                  <p>
-                    <strong>Trip Name:</strong> {selectedBooking.tripInfo?.name}
-                  </p>
-                  <p>
-                    <strong>Booking Date:</strong>{" "}
-                    {new Date(selectedBooking.bookingDate).toLocaleDateString(
-                      "en-GB",
-                      { timeZone: "Africa/Cairo" }
-                    )}
-                  </p>
-                  <p>
-                    <strong>Transportation:</strong>{" "}
-                    {selectedBooking.transportation ? "Yes" : "No"}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex justify-center">
-                <button
-                  onClick={closeModal}
-                  className="px-6 py-3 bg-red-600 text-white rounded-full shadow-lg hover:bg-red-700 transition-colors duration-300"
+              <div className="flex items-center gap-2">
+                <strong>Email:</strong>
+                <a
+                  href={`mailto:${selectedBooking.user.email}`}
+                  className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-500"
+                  title="Send email"
                 >
-                  Close
-                </button>
+                  <FaEnvelope />
+                  <span className="underline">{selectedBooking.user.email}</span>
+                </a>
               </div>
+
+              <p><strong>Phone:</strong> {selectedBooking.user.phone}</p>
+
+              {/* اقصى 3 سطور علشان ما يطوّلاش الكارت */}
+              <p title={selectedBooking.user.message} className="line-clamp-3">
+                <strong>Message:</strong> {selectedBooking.user.message}
+              </p>
+            </div>
+          </section>
+
+          {/* ===== Card 2: Trip Information ===== */}
+          <section className="h-full overflow-hidden rounded-2xl bg-white/80 text-neutral-900 ring-1 ring-black/5 shadow-sm flex flex-col">
+            <header className="px-4 pt-4">
+              <h3 className="text-lg font-semibold text-[#003cff]">Trip Information</h3>
+            </header>
+            <div className="px-4 pb-4 pt-2 space-y-3 grow overflow-y-auto">
+              <p>
+                <strong>Trip Name:</strong> {selectedBooking.tripInfo?.name}
+              </p>
+
+              <p>
+                <strong>Booking Date:</strong>{" "}
+                {new Date(selectedBooking.bookingDate).toLocaleDateString("en-GB", {
+                  timeZone: "Africa/Cairo",
+                })}
+              </p>
+
+              {/* أسعار مرتبة في عمودين */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-xl bg-white/70 p-3 ring-1 ring-black/5">
+                  <p className="font-semibold">Adult Price</p>
+                  <ul className="text-sm mt-1 space-y-0.5">
+                    <li>EURO: {selectedBooking?.tripInfo?.prices?.adult?.euro} €</li>
+                    <li>EGP: {selectedBooking?.tripInfo?.prices?.adult?.egp}</li>
+                  </ul>
+                </div>
+
+                <div className="rounded-xl bg-white/70 p-3 ring-1 ring-black/5">
+                  <p className="font-semibold">Child Price</p>
+                  <ul className="text-sm mt-1 space-y-0.5">
+                    <li>EURO: {selectedBooking?.tripInfo?.prices?.child?.euro} €</li>
+                    <li>EGP: {selectedBooking?.tripInfo?.prices?.child?.egp}</li>
+                  </ul>
+                </div>
+              </div>
+
+              <p>
+                <strong>Transportation:</strong>{" "}
+                {selectedBooking.transportation ? "Yes" : "No"}
+              </p>
+            </div>
+          </section>
+
+          {/* ===== Card 3: Booking Info ===== */}
+          <section className="h-full overflow-hidden rounded-2xl bg-white/80 text-neutral-900 ring-1 ring-black/5 shadow-sm flex flex-col">
+            <header className="px-4 pt-4">
+              <h3 className="text-lg font-semibold text-[#003cff]">Booking Info</h3>
+            </header>
+            <div className="px-4 pb-4 pt-2 space-y-2 grow overflow-y-auto">
+              <p>
+                <strong>Trip Name:</strong> {selectedBooking.tripInfo?.name}
+              </p>
+              <p>
+                <strong>Booking Date:</strong>{" "}
+                {new Date(selectedBooking.bookingDate).toLocaleDateString("en-GB", {
+                  timeZone: "Africa/Cairo",
+                })}
+              </p>
+              <p>
+                <strong>Transportation:</strong>{" "}
+                {selectedBooking.transportation ? "Yes" : "No"}
+              </p>
+              {/* لو حابب تضيف أي ملاحظات/Status هنا */}
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+{/* Modal */}
+{isModalOpen && selectedBooking && (
+  <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 backdrop-blur-sm p-4">
+    <div
+      role="dialog"
+      aria-modal="true"
+      className="w-full max-w-5xl rounded-2xl bg-neutral-900 text-neutral-100 shadow-2xl ring-1 ring-white/10 overflow-hidden"
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
+        <h2 className="text-xl sm:text-2xl font-semibold">Booking Details</h2>
+        <button
+          onClick={closeModal}
+          className="inline-flex items-center gap-2 rounded-full px-4 py-2 bg-red-600 hover:bg-red-700 transition focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 focus:ring-offset-neutral-900"
+        >
+          Close
+        </button>
+      </div>
+
+      {/* Body */}
+      <div className="px-6 py-5 max-h-[80vh] overflow-y-auto">
+        {/* Summary Row */}
+        <div className="mb-5 grid grid-cols-1 md:grid-cols-[160px,1fr,auto] gap-4 items-center">
+          {/* <div className="aspect-[4/3] w-full overflow-hidden rounded-xl bg-white/10 ring-1 ring-white/10">
+            <img
+              src={selectedBooking?.tripInfo?.images?.[0] ?? "https://via.placeholder.com/320x240?text=No+Image"}
+              alt={selectedBooking?.tripInfo?.name ?? "Trip image"}
+              className="h-full w-full object-cover"
+            />
+          </div> */}
+
+          <div className="space-y-1">
+            <p className="text-sm text-neutral-300">Trip</p>
+            <p className="text-lg font-semibold">
+              {selectedBooking?.tripInfo?.name ?? "—"}
+            </p>
+            <p className="text-sm">
+              <span className="text-neutral-300">Booking Date:</span>{" "}
+              {selectedBooking?.bookingDate
+                ? new Date(selectedBooking.bookingDate).toLocaleDateString("en-GB", { timeZone: "Africa/Cairo" })
+                : "—"}
+            </p>
+            <p className="text-sm">
+              <span className="text-neutral-300">Transportation:</span>{" "}
+              {selectedBooking?.transportation ? "Yes" : "No"}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2">
+            <div className="rounded-xl bg-white/10 px-3 py-2 text-center">
+              <p className="text-xs text-neutral-300">Adults</p>
+              <p className="text-base font-semibold">{selectedBooking?.adult ?? "—"}</p>
+            </div>
+            <div className="rounded-xl bg-white/10 px-3 py-2 text-center">
+              <p className="text-xs text-neutral-300">Children</p>
+              <p className="text-base font-semibold">{selectedBooking?.child ?? "—"}</p>
+            </div>
+            <div className="rounded-xl bg-white/10 px-3 py-2 text-center">
+              <p className="text-xs text-neutral-300">Paid</p>
+              <p className="text-base font-semibold">{selectedBooking?.payment ? "Yes" : "No"}</p>
             </div>
           </div>
-        )}
+        </div>
+
+        {/* 3 Cards grid with equal height */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch auto-rows-fr">
+          {/* User Information */}
+          <section className="h-full overflow-hidden rounded-2xl bg-white/80 text-neutral-900 ring-1 ring-black/5 shadow-sm flex flex-col">
+            <header className="px-4 pt-4">
+              <h3 className="text-lg font-semibold text-[#003cff]">User Information</h3>
+            </header>
+            <div className="px-4 pb-4 pt-2 space-y-2 grow overflow-y-auto">
+              <p>
+                <strong>Name:</strong>{" "}
+                {(selectedBooking?.user?.firstName ?? "—") + " " + (selectedBooking?.user?.lastName ?? "")}
+              </p>
+
+              <div className="flex items-center gap-2">
+                <strong>Email:</strong>
+                {selectedBooking?.user?.email ? (
+                  <a
+                    href={`mailto:${selectedBooking.user.email}`}
+                    className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-500 underline"
+                    title="Send email"
+                  >
+                    {selectedBooking.user.email}
+                  </a>
+                ) : (
+                  <span>—</span>
+                )}
+              </div>
+
+              <p>
+                <strong>Phone:</strong> {selectedBooking?.user?.phone ?? "—"}
+              </p>
+
+              <p title={selectedBooking?.user?.message ?? ""} className="line-clamp-3">
+                <strong>Message:</strong> {selectedBooking?.user?.message ?? "—"}
+              </p>
+            </div>
+          </section>
+
+          {/* Trip Information */}
+          <section className="h-full overflow-hidden rounded-2xl bg-white/80 text-neutral-900 ring-1 ring-black/5 shadow-sm flex flex-col">
+            <header className="px-4 pt-4">
+              <h3 className="text-lg font-semibold text-[#003cff]">Trip Information</h3>
+            </header>
+            <div className="px-4 pb-4 pt-2 space-y-3 grow overflow-y-auto">
+              <p>
+                <strong>Trip Name:</strong> {selectedBooking?.tripInfo?.name ?? "—"}
+              </p>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-xl bg-white/70 p-3 ring-1 ring-black/5">
+                  <p className="font-semibold">Adult Price</p>
+                  <ul className="text-sm mt-1 space-y-0.5">
+                    <li>EURO: {selectedBooking?.tripInfo?.prices?.adult?.euro ?? "—"} €</li>
+                    <li>EGP: {selectedBooking?.tripInfo?.prices?.adult?.egp ?? "—"}</li>
+                  </ul>
+                </div>
+
+                <div className="rounded-xl bg-white/70 p-3 ring-1 ring-black/5">
+                  <p className="font-semibold">Child Price</p>
+                  <ul className="text-sm mt-1 space-y-0.5">
+                    <li>EURO: {selectedBooking?.tripInfo?.prices?.child?.euro ?? "—"} €</li>
+                    <li>EGP: {selectedBooking?.tripInfo?.prices?.child?.egp ?? "—"}</li>
+                  </ul>
+                </div>
+              </div>
+
+              <p>
+                <strong>Transportation:</strong> {selectedBooking?.transportation ? "Yes" : "No"}
+              </p>
+            </div>
+          </section>
+
+          {/* Booking Info */}
+          <section className="h-full overflow-hidden rounded-2xl bg-white/80 text-neutral-900 ring-1 ring-black/5 shadow-sm flex flex-col">
+            <header className="px-4 pt-4">
+              <h3 className="text-lg font-semibold text-[#003cff]">Booking Info</h3>
+            </header>
+            <div className="px-4 pb-4 pt-2 space-y-2 grow overflow-y-auto">
+              <p>
+                <strong>Adults:</strong> {selectedBooking?.adult ?? "—"}
+              </p>
+              <p>
+                <strong>Children:</strong> {selectedBooking?.child ?? "—"}
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="font-semibold">Total (EURO)</p>
+                  <p>{selectedBooking?.totalPrice?.euro ?? "—"} €</p>
+                </div>
+                <div>
+                  <p className="font-semibold">Total (EGP)</p>
+                  <p>{selectedBooking?.totalPrice?.egp ?? "—"}</p>
+                </div>
+              </div>
+              <p>
+                <strong>Created:</strong>{" "}
+                {selectedBooking?.createdAt
+                  ? new Date(selectedBooking.createdAt).toLocaleString("en-GB", { timeZone: "Africa/Cairo" })
+                  : "—"}
+              </p>
+              <p>
+                <strong>Updated:</strong>{" "}
+                {selectedBooking?.updatedAt
+                  ? new Date(selectedBooking.updatedAt).toLocaleString("en-GB", { timeZone: "Africa/Cairo" })
+                  : "—"}
+              </p>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
       </main>
     </div>
   );
