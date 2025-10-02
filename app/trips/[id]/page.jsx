@@ -310,6 +310,21 @@ export default function Page() {
                          Payment Completed
                         </label>
                       </div>
+                      {/* check in */}
+                      <div className="flex items-center gap-3 px-2 py-1 rounded-3xl">
+                        <input
+                          {...register("checkIn")}
+                          type="checkbox"
+                          id="checkIn"
+                          className="w-5 h-5 accent-blue-400 rounded-sm border border-blue-300/40 bg-black/40"
+                        />
+                        <label
+                          htmlFor="payment"
+                          className="text-[15px] font-bold text-white"
+                        >
+                         Check In
+                        </label>
+                      </div>
 
                       {/* Totals */}
                       <div className="flex items-center justify-between gap-3 rounded-3xl bg-white/5 backdrop-blur ring-1 ring-blue-300/30 px-4 py-3">
