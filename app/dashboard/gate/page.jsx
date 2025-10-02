@@ -2,7 +2,7 @@
 
 import React, { useCallback, useMemo, useState, useEffect } from "react";
 import QrAutoScanner from "@/_components/uis/QrAutoScanner";
-import axios from "@/node_modules/axios/index";
+import axios from "axios";
 import { useRouter } from "next/navigation";
 
 export default function GatePage() {
@@ -11,6 +11,7 @@ export default function GatePage() {
   const [decoded, setDecoded] = useState(null);
   const [scanKey, setScanKey] = useState(0); // to re-mount scanner
   const [booking, setBooking] = useState(null);
+  const [loading, setLoading] = useState(false);
   const hasResult = useMemo(() => !!decoded, [decoded]);
   const router = useRouter();
 
@@ -87,19 +88,26 @@ export default function GatePage() {
   };
 
   useEffect(() => {
-    if (decoded) {
-      const fetchBooking = async () => {
-        try {
-          const response = await axios.get(
-            `https://abudabbba-backend.vercel.app/api/bookings/admin/${decoded.bid}`
-          );
-          setBooking(response.data);
-        } catch (error) {
-          console.log(error);
-        }
-      };
-      fetchBooking();
+    if (!decoded?.bid) return;
+    let cancelled = false;
+    async function fetchBooking() {
+      setLoading(true);
+      setError("");
+      try {
+        const response = await axios.get(
+          `https://abudabbba-backend.vercel.app/api/bookings/admin/${decoded.bid}`
+        );
+        if (!cancelled) setBooking(response.data);
+      } catch (error) {
+        if (!cancelled) setError("Failed to load booking details.");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     }
+    fetchBooking();
+    return () => {
+      cancelled = true;
+    };
   }, [decoded]);
 
   return (
@@ -146,7 +154,10 @@ export default function GatePage() {
           {/* Result card */}
           <div className="bg-gray-900/80 border border-white/10 rounded-2xl p-5 shadow-xl">
             <div className="text-gray-300 font-semibold mb-4">Result</div>
-            {decoded && booking ? (
+            {loading && (
+              <div className="text-gray-400">Loading booking details…</div>
+            )}
+            {decoded && booking && !loading ? (
               <div className="space-y-4">
                 {/* Booking ID */}
                 <div className="text-xs text-gray-400">Booking ID</div>

@@ -23,7 +23,9 @@ export default function QrAutoScanner({
 }) {
 	const containerRef = useRef(null);
 	const scannerRef = useRef(null);
-	const startedRef = useRef(false);
+	const startedRef = useRef(false); // init started
+	const runningRef = useRef(false); // camera running after start resolves
+	const firedSuccessRef = useRef(false);
 	const [error, setError] = useState(null);
 	const [permissionRequested, setPermissionRequested] = useState(false);
 
@@ -34,6 +36,23 @@ export default function QrAutoScanner({
 			if (!isMounted || startedRef.current || !containerRef.current) return;
 
 			try {
+				// Basic secure context & capability checks
+				if (typeof window !== "undefined") {
+					const isSecure =
+						location.protocol === "https:" || location.hostname === "localhost";
+					if (!isSecure) {
+						setError(
+							"Camera requires HTTPS or localhost. Open the page over HTTPS."
+						);
+						return;
+					}
+					if (!navigator.mediaDevices?.getUserMedia) {
+						setError(
+							"Camera not supported on this browser/device. Try updating your browser."
+						);
+						return;
+					}
+				}
 				// Dynamically import to avoid SSR issues
 				const { Html5Qrcode } = await import("html5-qrcode");
 
@@ -47,24 +66,30 @@ export default function QrAutoScanner({
 				const scanner = new Html5Qrcode(elementId, { verbose: false });
 				scannerRef.current = scanner;
 
-				startedRef.current = true;
 				setPermissionRequested(true);
 
+				// mark that we attempted to start
+				startedRef.current = true;
 				await scanner.start(
 					{ facingMode: cameraFacingMode },
 					{ fps, qrbox: qrBox, aspectRatio },
 					(decodedText, decodedResult) => {
-						if (!continuous) {
+						// Debounce duplicate callbacks from library
+						if (firedSuccessRef.current && !continuous) return;
+						firedSuccessRef.current = true;
+						if (!continuous && runningRef.current) {
 							// stop scanning after first success
 							scanner
 								.stop()
 								.then(() => scanner.clear())
 								.catch(() => {});
-							startedRef.current = false;
+							runningRef.current = false;
 						}
 						onScanSuccess?.(decodedText, decodedResult);
 					}
 				);
+				// start resolved successfully
+				runningRef.current = true;
 				setError(null);
 			} catch (err) {
 				setError(err?.message || String(err));
@@ -77,11 +102,12 @@ export default function QrAutoScanner({
 		return () => {
 			isMounted = false;
 			const scanner = scannerRef.current;
-			if (scanner && startedRef.current) {
+			if (scanner && runningRef.current) {
 				scanner
 					.stop()
 					.then(() => scanner.clear())
 					.catch(() => {});
+				runningRef.current = false;
 			}
 		};
 	}, [fps, qrBox, aspectRatio, continuous, cameraFacingMode, onScanError, onScanSuccess]);
