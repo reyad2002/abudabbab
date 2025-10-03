@@ -15,7 +15,7 @@ export default function BookingsPage() {
   const [transferFilter, setTransferFilter] = useState("all");
   const [sort, setSort] = useState("desc"); // NEW: خلي الافتراضي desc
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(8);
+  const [limit, setLimit] = useState(20);
   const [allBookings, setAllBookings] = useState([]);
   const [totalBookings, setTotalBookings] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -156,10 +156,133 @@ export default function BookingsPage() {
   return (
     <div className="min-h-screen bg-neutral-900 text-neutral-200">
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-lg font-semibold tracking-wide">
-          TOTAL BOOKINGS : {totalBookings}
-        </h1>
+        <div className="sm:flex gap-4  items-center">
+          <button
+            onClick={() => exportExsl(allBookings)}
+            className=" cursor-pointer rounded-xl border border-neutral-800 bg-blue-800/90 font-bold px-3 py-2 text-sm text-neutral-300 hover:bg-blue-800/75 transition duration-200"
+          >
+            Export Excel
+          </button>
+          <h1 className="text-lg font-semibold tracking-wide">
+            TOTAL BOOKINGS : {totalBookings}
+          </h1>
+        </div>
+        {/* NEW — Date Filter */}
+        <div className="flex items-center gap-2 mt-7">
+          <span className="text-xs uppercase tracking-wide text-neutral-400">
+            date
+          </span>
 
+          <select
+            value={dateMode}
+            onChange={(e) => {
+              const v = e.target.value;
+              setDateMode(v);
+              setDay("");
+              setMonth("");
+              setYear("");
+              setFrom("");
+              setTo("");
+              setLastDays("");
+              resetToFirst();
+            }}
+            className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
+          >
+            <option value="none">All time</option>
+            <option value="day">Day</option>
+            <option value="month">Month</option>
+            <option value="year">Year</option>
+            <option value="range">Range</option>
+            <option value="lastDays">Last N days</option>
+          </select>
+
+          {dateMode === "day" && (
+            <input
+              type="date"
+              value={day}
+              onChange={(e) => {
+                setDay(e.target.value);
+                resetToFirst();
+              }}
+              className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
+            />
+          )}
+
+          {dateMode === "month" && (
+            <input
+              type="month"
+              value={month}
+              onChange={(e) => {
+                setMonth(e.target.value);
+                resetToFirst();
+              }}
+              className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
+            />
+          )}
+
+          {dateMode === "year" && (
+            <input
+              type="number"
+              min="1970"
+              max="2100"
+              placeholder="YYYY"
+              value={year}
+              onChange={(e) => {
+                setYear(e.target.value);
+                resetToFirst();
+              }}
+              className="w-24 rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
+            />
+          )}
+
+          {dateMode === "range" && (
+            <>
+              <div className="">
+                <input
+                  type="date"
+                  value={from}
+                  onChange={(e) => {
+                    setFrom(e.target.value);
+                    resetToFirst();
+                  }}
+                  className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
+                  title="From (inclusive)"
+                />
+                <input
+                  type="date"
+                  value={to}
+                  onChange={(e) => {
+                    setTo(e.target.value);
+                    resetToFirst();
+                  }}
+                  className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
+                  title="To (inclusive)"
+                />
+              </div>
+            </>
+          )}
+
+          {dateMode === "lastDays" && (
+            <input
+              type="number"
+              min="1"
+              placeholder="e.g. 7"
+              value={lastDays}
+              onChange={(e) => {
+                setLastDays(e.target.value);
+                resetToFirst();
+              }}
+              className="w-24 rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
+            />
+          )}
+
+          <button
+            onClick={clearDateFilters}
+            className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 hover:bg-neutral-800/60"
+          >
+            Clear
+          </button>
+        </div>
         {/* Controls */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6 mt-7">
           {/* Search */}
@@ -233,6 +356,7 @@ export default function BookingsPage() {
               <option value="asc">Oldest</option>
             </select>
           </div>
+
           {/* Pagination */}
           <div className="flex items-center gap-2 justify-end">
             <PageBtn disabled={page <= 1} onClick={() => setPage(page - 1)}>
@@ -247,126 +371,6 @@ export default function BookingsPage() {
             >
               Next
             </PageBtn>
-          </div>
-          {/* NEW — Date Filter */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs uppercase tracking-wide text-neutral-400">
-              date
-            </span>
-
-            <select
-              value={dateMode}
-              onChange={(e) => {
-                const v = e.target.value;
-                setDateMode(v);
-                setDay("");
-                setMonth("");
-                setYear("");
-                setFrom("");
-                setTo("");
-                setLastDays("");
-                resetToFirst();
-              }}
-              className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
-            >
-              <option value="none">All time</option>
-              <option value="day">Day</option>
-              <option value="month">Month</option>
-              <option value="year">Year</option>
-              <option value="range">Range</option>
-              <option value="lastDays">Last N days</option>
-            </select>
-
-            {dateMode === "day" && (
-              <input
-                type="date"
-                value={day}
-                onChange={(e) => {
-                  setDay(e.target.value);
-                  resetToFirst();
-                }}
-                className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
-              />
-            )}
-
-            {dateMode === "month" && (
-              <input
-                type="month"
-                value={month}
-                onChange={(e) => {
-                  setMonth(e.target.value);
-                  resetToFirst();
-                }}
-                className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
-              />
-            )}
-
-            {dateMode === "year" && (
-              <input
-                type="number"
-                min="1970"
-                max="2100"
-                placeholder="YYYY"
-                value={year}
-                onChange={(e) => {
-                  setYear(e.target.value);
-                  resetToFirst();
-                }}
-                className="w-24 rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
-              />
-            )}
-
-            {dateMode === "range" && (
-              <>
-                <input
-                  type="date"
-                  value={from}
-                  onChange={(e) => {
-                    setFrom(e.target.value);
-                    resetToFirst();
-                  }}
-                  className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
-                  title="From (inclusive)"
-                />
-                <input
-                  type="date"
-                  value={to}
-                  onChange={(e) => {
-                    setTo(e.target.value);
-                    resetToFirst();
-                  }}
-                  className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
-                  title="To (inclusive)"
-                />
-              </>
-            )}
-
-            {dateMode === "lastDays" && (
-              <input
-                type="number"
-                min="1"
-                placeholder="e.g. 7"
-                value={lastDays}
-                onChange={(e) => {
-                  setLastDays(e.target.value);
-                  resetToFirst();
-                }}
-                className="w-24 rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
-              />
-            )}
-
-            <button
-              onClick={clearDateFilters}
-              className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 hover:bg-neutral-800/60"
-            >
-              Clear
-            </button>
-            <button
-              onClick={() => exportExsl(allBookings)}
-              className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 hover:bg-neutral-800/60"
-            >
-              Export Excel
-            </button>
           </div>
         </div>
 
@@ -465,7 +469,6 @@ export default function BookingsPage() {
           </div>
         </div>
 
-        {/* Modal */}
         {/* Modal */}
         {isModalOpen && selectedBooking && (
           <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 backdrop-blur-sm p-4">
@@ -634,7 +637,7 @@ export default function BookingsPage() {
               className="w-full max-w-5xl rounded-2xl bg-neutral-900 text-neutral-100 shadow-2xl ring-1 ring-white/10 overflow-hidden"
             >
               {/* Header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-gradient-to-r from-indigo-600 to-blue-500 text-white">
                 <h2 className="text-xl sm:text-2xl font-semibold">
                   Booking Details
                 </h2>
@@ -650,17 +653,9 @@ export default function BookingsPage() {
               <div className="px-6 py-5 max-h-[80vh] overflow-y-auto">
                 {/* Summary Row */}
                 <div className="mb-5 grid grid-cols-1 md:grid-cols-[160px,1fr,auto] gap-4 items-center">
-                  {/* <div className="aspect-[4/3] w-full overflow-hidden rounded-xl bg-white/10 ring-1 ring-white/10">
-            <img
-              src={selectedBooking?.tripInfo?.images?.[0] ?? "https://via.placeholder.com/320x240?text=No+Image"}
-              alt={selectedBooking?.tripInfo?.name ?? "Trip image"}
-              className="h-full w-full object-cover"
-            />
-          </div> */}
-
                   <div className="space-y-1">
                     <p className="text-sm text-neutral-300">Trip</p>
-                    <p className="text-lg font-semibold">
+                    <p className="text-lg font-semibold text-indigo-400">
                       {selectedBooking?.tripInfo?.name ?? "—"}
                     </p>
                     <p className="text-sm">
@@ -675,27 +670,42 @@ export default function BookingsPage() {
                     </p>
                     <p className="text-sm">
                       <span className="text-neutral-300">Transportation:</span>{" "}
-                      {selectedBooking?.transportation ? "Yes" : "No"}
+                      <span
+                        className={
+                          selectedBooking?.transportation
+                            ? "text-green-400"
+                            : "text-red-400"
+                        }
+                      >
+                        {selectedBooking?.transportation ? "Yes" : "No"}
+                      </span>
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-2">
+                  {/* Booking Stats */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     <div className="rounded-xl bg-white/10 px-3 py-2 text-center">
                       <p className="text-xs text-neutral-300">Adults</p>
-                      <p className="text-base font-semibold">
+                      <p className="text-base font-semibold text-blue-400">
                         {selectedBooking?.adult ?? "—"}
                       </p>
                     </div>
                     <div className="rounded-xl bg-white/10 px-3 py-2 text-center">
                       <p className="text-xs text-neutral-300">Children</p>
-                      <p className="text-base font-semibold">
+                      <p className="text-base font-semibold text-pink-400">
                         {selectedBooking?.child ?? "—"}
                       </p>
                     </div>
                     <div className="rounded-xl bg-white/10 px-3 py-2 text-center">
                       <p className="text-xs text-neutral-300">Paid</p>
-                      <p className="text-base font-semibold">
+                      <p className="text-base font-semibold text-green-500">
                         {selectedBooking?.payment ? "Yes" : "No"}
+                      </p>
+                    </div>
+                    <div className="rounded-xl bg-white/10 px-3 py-2 text-center">
+                      <p className="text-xs text-neutral-300">Check In</p>
+                      <p className="text-base font-semibold text-yellow-500">
+                        {selectedBooking?.checkIn ? "Yes" : "No"}
                       </p>
                     </div>
                   </div>
@@ -704,22 +714,22 @@ export default function BookingsPage() {
                 {/* 3 Cards grid with equal height */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch auto-rows-fr">
                   {/* User Information */}
-                  <section className="h-full overflow-hidden rounded-2xl bg-white/80 text-neutral-900 ring-1 ring-black/5 shadow-sm flex flex-col">
-                    <header className="px-4 pt-4">
-                      <h3 className="text-lg font-semibold text-[#003cff]">
+                  <section className="h-full overflow-hidden rounded-2xl bg-white/10 text-gray-300 ring-1 ring-black/5 shadow-sm flex flex-col">
+                    <header className="px-4 pt-4 bg-gradient-to-r from-green-500 to-teal-400 text-white">
+                      <h3 className="text-lg font-semibold">
                         User Information
                       </h3>
                     </header>
                     <div className="px-4 pb-4 pt-2 space-y-2 grow overflow-y-auto">
                       <p>
-                        <strong>Name:</strong>{" "}
+                        <strong className="text-blue-500">Name:</strong>{" "}
                         {(selectedBooking?.user?.firstName ?? "—") +
                           " " +
                           (selectedBooking?.user?.lastName ?? "")}
                       </p>
 
                       <div className="flex items-center gap-2">
-                        <strong>Email:</strong>
+                        <strong className="text-blue-500">Email:</strong>
                         {selectedBooking?.user?.email ? (
                           <a
                             href={`mailto:${selectedBooking.user.email}`}
@@ -734,45 +744,46 @@ export default function BookingsPage() {
                       </div>
 
                       <p>
-                        <strong>Phone:</strong>{" "}
+                        <strong className="text-blue-500">Phone:</strong>{" "}
                         {selectedBooking?.user?.phone ?? "—"}
                       </p>
 
                       <p
                         title={selectedBooking?.user?.message ?? ""}
-                        // className="line-clamp-3"
+                        className="line-clamp-3"
                       >
-                        <strong>Message:</strong>{" "}
-                        {selectedBooking?.user?.message ?? "—"} 
-                        
+                        <strong className="text-blue-500">Message:</strong>{" "}
+                        {selectedBooking?.user?.message ?? "—"}
                       </p>
                     </div>
                   </section>
 
                   {/* Trip Information */}
-                  <section className="h-full overflow-hidden rounded-2xl bg-white/80 text-neutral-900 ring-1 ring-black/5 shadow-sm flex flex-col">
-                    <header className="px-4 pt-4">
-                      <h3 className="text-lg font-semibold text-[#003cff]">
+                  <section className="h-full overflow-hidden rounded-2xl bg-white/10 text-gray-300 ring-1 ring-black/5 shadow-sm flex flex-col">
+                    <header className="px-4 pt-4 bg-gradient-to-r from-yellow-500 to-orange-400 text-white">
+                      <h3 className="text-lg font-semibold">
                         Trip Information
                       </h3>
                     </header>
                     <div className="px-4 pb-4 pt-2 space-y-3 grow overflow-y-auto">
                       <p>
-                        <strong>Trip Name:</strong>{" "}
+                        <strong className="text-yellow-400">Trip Name:</strong>{" "}
                         {selectedBooking?.tripInfo?.name ?? "—"}
                       </p>
 
                       <div className="grid grid-cols-2 gap-3">
-                        <div className="rounded-xl bg-white/70 p-3 ring-1 ring-black/5">
-                          <p className="font-semibold">Adult Price</p>
+                        <div className="rounded-xl bg-white/10 p-3 ring-1 ring-black/5">
+                          <p className="font-semibold text-green-400">
+                            Adult Price
+                          </p>
                           <ul className="text-sm mt-1 space-y-0.5">
-                            <li>
+                            <li className="text-green-500">
                               EURO:{" "}
                               {selectedBooking?.tripInfo?.prices?.adult?.euro ??
                                 "—"}{" "}
                               €
                             </li>
-                            <li>
+                            <li className="text-green-500">
                               EGP:{" "}
                               {selectedBooking?.tripInfo?.prices?.adult?.egp ??
                                 "—"}
@@ -780,16 +791,18 @@ export default function BookingsPage() {
                           </ul>
                         </div>
 
-                        <div className="rounded-xl bg-white/70 p-3 ring-1 ring-black/5">
-                          <p className="font-semibold">Child Price</p>
+                        <div className="rounded-xl bg-white/10 p-3 ring-1 ring-black/5">
+                          <p className="font-semibold text-pink-400">
+                            Child Price
+                          </p>
                           <ul className="text-sm mt-1 space-y-0.5">
-                            <li>
+                            <li className="text-pink-500">
                               EURO:{" "}
                               {selectedBooking?.tripInfo?.prices?.child?.euro ??
                                 "—"}{" "}
                               €
                             </li>
-                            <li>
+                            <li className="text-pink-500">
                               EGP:{" "}
                               {selectedBooking?.tripInfo?.prices?.child?.egp ??
                                 "—"}
@@ -799,39 +812,44 @@ export default function BookingsPage() {
                       </div>
 
                       <p>
-                        <strong>Transportation:</strong>{" "}
+                        <strong className="text-yellow-500">
+                          Transportation:
+                        </strong>{" "}
                         {selectedBooking?.transportation ? "Yes" : "No"}
                       </p>
                     </div>
                   </section>
 
                   {/* Booking Info */}
-                  <section className="h-full overflow-hidden rounded-2xl bg-white/80 text-neutral-900 ring-1 ring-black/5 shadow-sm flex flex-col">
-                    <header className="px-4 pt-4">
-                      <h3 className="text-lg font-semibold text-[#003cff]">
-                        Booking Info
-                      </h3>
+                  <section className="h-full overflow-hidden rounded-2xl bg-white/10 text-gray-300 ring-1 ring-black/5 shadow-sm flex flex-col">
+                    <header className="px-4 pt-4 bg-gradient-to-r from-pink-500 to-red-400 text-white">
+                      <h3 className="text-lg font-semibold">Booking Info</h3>
                     </header>
                     <div className="px-4 pb-4 pt-2 space-y-2 grow overflow-y-auto">
                       <p>
-                        <strong>Adults:</strong> {selectedBooking?.adult ?? "—"}
+                        <strong className="text-pink-500">Adults:</strong>{" "}
+                        {selectedBooking?.adult ?? "—"}
                       </p>
                       <p>
-                        <strong>Children:</strong>{" "}
+                        <strong className="text-pink-500">Children:</strong>{" "}
                         {selectedBooking?.child ?? "—"}
                       </p>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <p className="font-semibold">Total (EURO)</p>
+                          <p className="font-semibold text-red-400">
+                            Total (EURO)
+                          </p>
                           <p>{selectedBooking?.totalPrice?.euro ?? "—"} €</p>
                         </div>
                         <div>
-                          <p className="font-semibold">Total (EGP)</p>
+                          <p className="font-semibold text-red-400">
+                            Total (EGP)
+                          </p>
                           <p>{selectedBooking?.totalPrice?.egp ?? "—"}</p>
                         </div>
                       </div>
                       <p>
-                        <strong>Created:</strong>{" "}
+                        <strong className="text-red-400">Created:</strong>{" "}
                         {selectedBooking?.createdAt
                           ? new Date(selectedBooking.createdAt).toLocaleString(
                               "en-GB",
@@ -840,7 +858,7 @@ export default function BookingsPage() {
                           : "—"}
                       </p>
                       <p>
-                        <strong>Updated:</strong>{" "}
+                        <strong className="text-red-400">Updated:</strong>{" "}
                         {selectedBooking?.updatedAt
                           ? new Date(selectedBooking.updatedAt).toLocaleString(
                               "en-GB",

@@ -10,7 +10,7 @@ export default function UsersPage() {
   const [roleFilter, setRoleFilter] = useState("all");
   const [sort, setSort] = useState("recent");
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(8);
+  const [limit, setLimit] = useState(20);
   const [totalPages, setTotalPages] = useState(1);
   const [allUsers, setAllUsers] = useState([]);
 
