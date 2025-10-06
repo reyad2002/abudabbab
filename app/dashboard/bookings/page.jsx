@@ -124,7 +124,7 @@ export default function BookingsPage() {
     lastDays,
     payment,
     checkIn,
-    tripName
+    tripName,
   ]);
 
   const resetToFirst = () => setPage(1);
@@ -412,7 +412,11 @@ export default function BookingsPage() {
             >
               <option value="">All Trips</option>
               {trips.map((e) => {
-                return  <option value={e?.name} key={e?.name}>{e?.name}</option>;
+                return (
+                  <option value={e?.name} key={e?.name}>
+                    {e?.name}
+                  </option>
+                );
               })}
             </select>
           </div>
