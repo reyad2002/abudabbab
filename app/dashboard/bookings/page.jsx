@@ -67,11 +67,12 @@ export default function BookingsPage() {
     }
     return p;
   };
+  // get trips for filter
   useEffect(() => {
     // طلب البيانات من الـ API عند تحميل المكون
     dispatch(fetchTripsData("https://abudabbba-backend.vercel.app/api/trips"));
   }, [dispatch]);
-
+ // get all bookings
   useEffect(() => {
     const fetchBookings = async () => {
       try {
@@ -88,7 +89,7 @@ export default function BookingsPage() {
           tripName,
           ...buildDateParams(), // NEW
         };
-
+        // call using axios
         const response = await axios.get(
           `https://abudabbba-backend.vercel.app/api/bookings/admin`,
           { params }
