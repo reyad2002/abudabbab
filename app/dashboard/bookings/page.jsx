@@ -306,7 +306,7 @@ export default function BookingsPage() {
           </button>
         </div>
         {/* Controls (Redesigned) */}
-        <div className="sticky top-0 z-30 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3">
+        <div className=" top-0 z-30 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3">
           {/* Primary Row */}
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             {/* Left cluster: Search + Field */}
