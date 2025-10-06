@@ -7,7 +7,7 @@ import React, { useEffect, useState } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { Field, PriceGroup, Section, inputCls } from "@/lib/helpers/helpers";
-import axios from "axios";
+
 
 export default function AddTripPageRHF() {
   const dispatch = useDispatch();
@@ -316,6 +316,10 @@ export default function AddTripPageRHF() {
               )}
             </div>
           </Section>
+
+
+
+
 
           {/* Features */}
           <Section title="Features">

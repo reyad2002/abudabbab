@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchTripsData } from "../../lib/apis/tripsApi"; // استيراد الـ action
 import { setTripId } from "../store/bookingSlice";
-import axios from "axios";
 
 const container = {
   hidden: { opacity: 0 },
@@ -120,10 +119,10 @@ export default function TripsSection() {
                 </h3>
 
                 {/* تقييم الرحلة */}
-                <div className="mt-2 flex items-center gap-2 text-xs text-slate-500">
+                {/* <div className="mt-2 flex items-center gap-2 text-xs text-slate-500">
                   <span>⭐⭐⭐⭐</span>
                   <span>({t.rating} Rating)</span>
-                </div>
+                </div> */}
 
                 {/* الأسعار */}
                 <div className="mt-3 text-slate-900">

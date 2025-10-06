@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { CldUploadWidget } from "next-cloudinary";
+
 import React, { useEffect, useState } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
-import { useDispatch, useSelector } from "react-redux";
+import { useForm, useFieldArray  , Controller } from "react-hook-form";
+import { useDispatch, useSelector  } from "react-redux";
 import { useParams, useRouter } from "next/navigation";
 import {
   postTrip,
@@ -209,67 +211,151 @@ export default function AddTripPageRHF() {
             </Field>
           </Section>
 
-          {/* Images */}
-          <Section title="Images (URLs)">
+      {/* Images */}
+      <Section title="Images (URLs)">
             <div className="space-y-3">
-              {imageFields.map((row, i) => (
-                <div key={row.id} className="flex items-center gap-2">
-                  <input
-                    className={inputCls(
-                      errors?.images?.[i]?.url,
-                      "flex-1 min-w-0"
-                    )}
-                    placeholder="https://…"
-                    {...register(`images.${i}.url`, {
-                      required: "URL required",
-                      pattern: {
-                        value: /^https?:\/\/.+/i,
-                        message: "Invalid URL",
-                      },
-                    })}
-                  />
-                  <div className="flex gap-1">
-                    <button
-                      type="button"
-                      title="Move up"
-                      onClick={() => moveImage(i, i - 1)}
-                      className="px-2 py-1 rounded-lg border border-zinc-700 bg-zinc-900/60 hover:bg-zinc-900 text-xs"
-                    >
-                      ↑
-                    </button>
-                    <button
-                      type="button"
-                      title="Move down"
-                      onClick={() => moveImage(i, i + 1)}
-                      className="px-2 py-1 rounded-lg border border-zinc-700 bg-zinc-900/60 hover:bg-zinc-900 text-xs"
-                    >
-                      ↓
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => removeImage(i)}
-                      className="px-2 py-1 rounded-lg border border-rose-700 bg-rose-900/30 hover:bg-rose-900/40 text-xs"
-                    >
-                      Remove
-                    </button>
+              {imageFields.map((row, i) => {
+                const url = imagesWatch?.[i]?.url || "";
+                return (
+                  <div key={row.id} className="flex items-center gap-2">
+                    <div className="h-12 w-16 overflow-hidden rounded border border-zinc-800 bg-zinc-900 grid place-items-center shrink-0">
+                      {url ? (
+                        <img
+                          src={url}
+                          alt={`img-${i}`}
+                          className="h-full w-full object-cover"
+                          onError={(e) =>
+                            (e.currentTarget.style.opacity = "0.25")
+                          }
+                        />
+                      ) : (
+                        <span className="text-[10px] text-zinc-500">
+                          preview
+                        </span>
+                      )}
+                    </div>
+
+                    {/* <input
+                      className={inputCls(
+                        errors?.images?.[i]?.url,
+                        "flex-1 min-w-0"
+                      )}
+                      //   type="file"
+                      {...register(`images.${i}.url`, {
+                        required: "URL required",
+                      })}
+                    /> */}
+
+                    <Controller
+                      control={control}
+                      name={`images.${i}.url`}
+                      rules={{ required: "URL required" }}
+                      render={({ field: { value, onChange, onBlur, ref } }) => (
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <input
+                            ref={ref}
+                            value={value || ""}
+                            onChange={onChange}
+                            onBlur={onBlur}
+                            className={inputCls(
+                              errors?.images?.[i]?.url,
+                              "flex-1 min-w-0"
+                            )}
+                            placeholder="Image URL"
+                          />
+                          <CldUploadWidget
+                            uploadPreset="image_abodbab"
+                            options={{
+                              maxFileSize: 2000000, // 2MB
+                              sources: ["local", "camera"],
+                              styles: {
+                                palette: {
+                                  window: "#07253E",
+                                  windowBorder: "#90A0B3",
+                                  tabIcon: "#0078FF",
+                                  menuIcons: "#5A616A",
+                                  textDark: "#000000",
+                                  textLight: "#FFFFFF",
+                                  link: "#0078FF",
+                                  action: "#FF620C",
+                                  inactiveTabIcon: "#245DA7",
+                                  error: "#F44235",
+                                  inProgress: "#0078FF",
+                                  complete: "#20B832",
+                                  sourceBg: "#000000",
+                                },
+                                fonts: { default: { active: true } },
+                              },
+                            }}
+                            onSuccess={(result) => {
+                              const info = result?.info;
+                              const url =
+                                (info &&
+                                  typeof info === "object" &&
+                                  (info.secure_url || info.url)) ||
+                                "";
+                              if (url) onChange(url);
+                            }}
+                          >
+                            {({ open }) => (
+                              <button
+                                type="button"
+                                onClick={() => open()}
+                                className="px-3 py-1.5 rounded-lg border border-zinc-700 bg-zinc-900/60 hover:bg-zinc-900 text-sm cursor-pointer"
+                              >
+                                Upload
+                              </button>
+                            )}
+                          </CldUploadWidget>
+                        </div>
+                      )}
+                    />
+
+                    <div className="flex gap-1">
+                      <button
+                        type="button"
+                        title="Move up"
+                        onClick={() => moveImage(i, i - 1)}
+                        className="px-2 py-1 rounded-lg border border-zinc-700 bg-zinc-900/60 hover:bg-zinc-900 text-xs"
+                      >
+                        ↑
+                      </button>
+                      <button
+                        type="button"
+                        title="Move down"
+                        onClick={() => moveImage(i, i + 1)}
+                        className="px-2 py-1 rounded-lg border border-zinc-700 bg-zinc-900/60 hover:bg-zinc-900 text-xs"
+                      >
+                        ↓
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeImage(i)}
+                        className="px-2 py-1 rounded-lg border border-rose-700 bg-rose-900/30 hover:bg-rose-900/40 text-xs"
+                      >
+                        Remove
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
+
               <div className="flex justify-between">
                 <p className="text-xs text-zinc-500">
                   First image will be used as the cover. (Max 5)
                 </p>
                 <button
                   type="button"
-                  onClick={() =>
-                    imageFields.length < 5 && appendImage({ url: "" })
-                  }
+                  onClick={() => {
+                    if (imageFields.length < 5) appendImage({ url: "" });
+                  }}
                   className="px-3 py-1.5 rounded-lg border border-zinc-700 bg-zinc-900/60 hover:bg-zinc-900 text-sm"
                 >
                   + Add image
                 </button>
               </div>
-              {errors?.images?.message && (
+
+              {typeof errors?.images?.message === "string" && (
                 <p className="text-rose-300 text-xs">{errors.images.message}</p>
               )}
             </div>
