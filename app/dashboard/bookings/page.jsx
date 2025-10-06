@@ -390,12 +390,12 @@ export default function BookingsPage() {
                 </PageBtn>
               </div>
 
-              <button
+              {/* <button
                 onClick={() => exportExsl(allBookings)}
                 className="rounded-lg border border-neutral-800 bg-blue-600/90 px-3 py-2 text-sm font-medium text-white hover:bg-blue-600"
               >
                 Export
-              </button>
+              </button> */}
             </div>
           </div>
 
