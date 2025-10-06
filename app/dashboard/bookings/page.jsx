@@ -72,7 +72,7 @@ export default function BookingsPage() {
     // طلب البيانات من الـ API عند تحميل المكون
     dispatch(fetchTripsData("https://abudabbba-backend.vercel.app/api/trips"));
   }, [dispatch]);
- // get all bookings
+  // get all bookings
   useEffect(() => {
     const fetchBookings = async () => {
       try {
@@ -305,155 +305,263 @@ export default function BookingsPage() {
             Clear
           </button>
         </div>
-        {/* Controls */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6 mt-7">
-          {/* Search */}
-          <div className="flex items-center gap-2">
-            <div className="relative flex-1">
-              <input
-                value={q}
-                onChange={(e) => {
-                  setQ(e.target.value);
-                  resetToFirst();
-                }}
-                placeholder={`search by ${searchField}`}
-                className="w-full rounded-xl border border-neutral-800 bg-neutral-900/60 px-10 py-2 text-sm placeholder-neutral-500 outline-none focus:ring-2 focus:ring-neutral-700"
-              />
-              <svg
-                viewBox="0 0 24 24"
-                className="pointer-events-none absolute left-3 top-2.5 h-5 w-5 fill-neutral-500"
-              >
-                <path d="M10 2a8 8 0 105.3 14.1l4.3 4.3 1.4-1.4-4.3-4.3A8 8 0 0010 2zm0 2a6 6 0 110 12A6 6 0 0110 4z" />
-              </svg>
-            </div>
-            <div className="shrink-0">
-              <select
+        {/* Controls (Redesigned) */}
+        <div className="sticky top-0 z-30 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3">
+          {/* Primary Row */}
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            {/* Left cluster: Search + Field */}
+            <div className="flex items-center gap-2 w-full md:max-w-xl">
+              <div className="relative flex-1">
+                <input
+                  value={q}
+                  onChange={(e) => {
+                    setQ(e.target.value);
+                    resetToFirst();
+                  }}
+                  placeholder={`search by ${searchField}`}
+                  className="w-full rounded-xl border border-neutral-800 bg-neutral-900/60 px-10 py-2 text-sm placeholder-neutral-500 outline-none focus:ring-2 focus:ring-neutral-700"
+                />
+                <svg
+                  viewBox="0 0 24 24"
+                  className="pointer-events-none absolute left-3 top-2.5 h-5 w-5 fill-neutral-500"
+                >
+                  <path d="M10 2a8 8 0 105.3 14.1l4.3 4.3 1.4-1.4-4.3-4.3A8 8 0 0010 2zm0 2a6 6 0 110 12A6 6 0 0110 4z" />
+                </svg>
+              </div>
+
+              <SelectMini
                 value={searchField}
-                onChange={(e) => {
-                  setSearchField(e.target.value);
+                onChange={(v) => {
+                  setSearchField(v);
                   resetToFirst();
                 }}
-                className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-xs text-neutral-300 focus:ring-2 focus:ring-neutral-700"
+                label="Field"
+                options={[
+                  { value: "firstName", label: "name" },
+                  { value: "phone", label: "phone" },
+                  { value: "email", label: "email" },
+                ]}
+              />
+            </div>
+
+            {/* Right cluster: Pagination + Sort + Limit + Export */}
+            <div className="flex items-center gap-2 justify-between md:justify-end">
+              <div className="hidden sm:flex items-center gap-2">
+                <SelectMini
+                  value={sort}
+                  onChange={(v) => {
+                    setSort(v);
+                    resetToFirst();
+                  }}
+                  label="Sort"
+                  options={[
+                    { value: "desc", label: "Newest" },
+                    { value: "asc", label: "Oldest" },
+                  ]}
+                />
+                <SelectMini
+                  value={String(limit)}
+                  onChange={(v) => {
+                    setLimit(Number(v));
+                    resetToFirst();
+                  }}
+                  label="Rows"
+                  options={[
+                    { value: "10", label: "10" },
+                    { value: "20", label: "20" },
+                    { value: "50", label: "50" },
+                    { value: "100", label: "100" },
+                  ]}
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <PageBtn disabled={page <= 1} onClick={() => setPage(page - 1)}>
+                  Prev
+                </PageBtn>
+                <span className="text-sm text-neutral-400 whitespace-nowrap">
+                  {page} / {totalPages}
+                </span>
+                <PageBtn
+                  disabled={page >= totalPages}
+                  onClick={() => setPage(page + 1)}
+                >
+                  Next
+                </PageBtn>
+              </div>
+
+              <button
+                onClick={() => exportExsl(allBookings)}
+                className="rounded-lg border border-neutral-800 bg-blue-600/90 px-3 py-2 text-sm font-medium text-white hover:bg-blue-600"
               >
-                <option value="firstName">name</option>
-                <option value="phone">phone</option>
-                <option value="email">email</option>
-              </select>
+                Export
+              </button>
             </div>
           </div>
 
-          {/* Transfer Filter */}
-          <div className="flex items-center gap-2">
+          {/* Quick chips row (reflect active filters) */}
+          <div className="mt-3 flex flex-wrap items-center gap-2">
             <span className="text-xs uppercase tracking-wide text-neutral-400">
-              filter
+              filters
             </span>
-            <select
-              value={transferFilter}
-              onChange={(e) => {
-                setTransferFilter(e.target.value);
-                resetToFirst();
-              }}
-              className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
-            >
-              <option value="all">Transfer: All</option>
-              <option value="yes">Transfer: Yes</option>
-              <option value="no">Transfer: No</option>
-            </select>
-          </div>
 
-          {/* payment Filter */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs uppercase tracking-wide text-neutral-400">
-              paymeny
-            </span>
-            <select
-              value={payment}
-              onChange={(e) => {
-                setPaymentFilter(e.target.value);
+            <FilterChip
+              label={`Transfer: ${transferFilter}`}
+              active={transferFilter !== "all"}
+              onClear={() => {
+                setTransferFilter("all");
                 resetToFirst();
               }}
-              className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
-            >
-              <option value="all">payment: All</option>
-              <option value="yes">payment: Yes</option>
-              <option value="no">payment: No</option>
-            </select>
-          </div>
-          {/* checkIn Filter */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs uppercase tracking-wide text-neutral-400">
-              checkIn
-            </span>
-            <select
-              value={checkIn}
-              onChange={(e) => {
-                setcheckInFilter(e.target.value);
+            />
+            <FilterChip
+              label={`Payment: ${payment}`}
+              active={payment !== "all"}
+              onClear={() => {
+                setPaymentFilter("all");
                 resetToFirst();
               }}
-              className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
-            >
-              <option value="all">checkIn: All</option>
-              <option value="yes">checkIn: Yes</option>
-              <option value="no">checkIn: No</option>
-            </select>
-          </div>
+            />
+            <FilterChip
+              label={`CheckIn: ${checkIn}`}
+              active={checkIn !== "all"}
+              onClear={() => {
+                setcheckInFilter("all");
+                resetToFirst();
+              }}
+            />
+            <FilterChip
+              label={tripName ? `Trip: ${tripName}` : "Trip: All"}
+              active={!!tripName}
+              onClear={() => {
+                setTripNameFilter("");
+                resetToFirst();
+              }}
+            />
+            {/* Date summary chip */}
+            <FilterChip
+              label={
+                dateMode === "none"
+                  ? "Date: All time"
+                  : dateMode === "day"
+                  ? `Date: ${day || "—"}`
+                  : dateMode === "month"
+                  ? `Month: ${month || "—"}`
+                  : dateMode === "year"
+                  ? `Year: ${year || "—"}`
+                  : dateMode === "range"
+                  ? `Range: ${from || "—"} → ${to || "—"}`
+                  : `Last ${lastDays || "—"} days`
+              }
+              active={dateMode !== "none"}
+              onClear={() => {
+                clearDateFilters();
+              }}
+            />
 
-          {/* tripName Filter */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs uppercase tracking-wide text-neutral-400">
-              trip name
-            </span>
-            <select
-              value={tripName}
-              onChange={(e) => {
-                setTripNameFilter(e.target.value);
+            <span className="mx-2 h-5 w-px bg-neutral-800" />
+            <button
+              onClick={() => {
+                // reset everything at once
+                setQ("");
+                setSearchField("firstName");
+                setTransferFilter("all");
+                setPaymentFilter("all");
+                setcheckInFilter("all");
+                setTripNameFilter("");
+                setSort("desc");
+                setLimit(20);
+                clearDateFilters();
                 resetToFirst();
               }}
-              className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
+              className="rounded-lg border border-neutral-800 bg-neutral-900/60 px-3 py-1.5 text-sm text-neutral-300 hover:bg-neutral-800/60"
             >
-              <option value="">All Trips</option>
-              {trips.map((e) => {
-                return (
-                  <option value={e?.name} key={e?.name}>
-                    {e?.name}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
+              Reset all
+            </button>
 
-          {/* Sort */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs uppercase tracking-wide text-neutral-400">
-              sort
-            </span>
-            <select
-              value={sort}
-              onChange={(e) => {
-                setSort(e.target.value);
-                resetToFirst();
-              }}
-              className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
-            >
-              <option value="desc">Newest</option>
-              <option value="asc">Oldest</option>
-            </select>
-          </div>
+            {/* Toggle more filters */}
+            <details className="ml-auto group">
+              <summary className="list-none inline-flex items-center gap-2 rounded-lg border border-neutral-800 bg-neutral-900/60 px-3 py-1.5 text-sm text-neutral-300 hover:bg-neutral-800/60 cursor-pointer">
+                More filters
+                <svg
+                  className="h-4 w-4 transition-transform group-open:rotate-180"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </summary>
 
-          {/* Pagination */}
-          <div className="flex items-center gap-2 justify-end">
-            <PageBtn disabled={page <= 1} onClick={() => setPage(page - 1)}>
-              Prev
-            </PageBtn>
-            <span className="text-sm text-neutral-400">
-              {page} / {totalPages}
-            </span>
-            <PageBtn
-              disabled={page >= totalPages}
-              onClick={() => setPage(page + 1)}
-            >
-              Next
-            </PageBtn>
+              {/* Advanced row */}
+              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {/* Transfer */}
+                <SelectLabeled
+                  label="Transfer"
+                  value={transferFilter}
+                  onChange={(v) => {
+                    setTransferFilter(v);
+                    resetToFirst();
+                  }}
+                  options={[
+                    { value: "all", label: "All" },
+                    { value: "yes", label: "Yes" },
+                    { value: "no", label: "No" },
+                  ]}
+                />
+                {/* Payment */}
+                <SelectLabeled
+                  label="Payment"
+                  value={payment}
+                  onChange={(v) => {
+                    setPaymentFilter(v);
+                    resetToFirst();
+                  }}
+                  options={[
+                    { value: "all", label: "All" },
+                    { value: "yes", label: "Yes" },
+                    { value: "no", label: "No" },
+                  ]}
+                />
+                {/* CheckIn */}
+                <SelectLabeled
+                  label="Check in"
+                  value={checkIn}
+                  onChange={(v) => {
+                    setcheckInFilter(v);
+                    resetToFirst();
+                  }}
+                  options={[
+                    { value: "all", label: "All" },
+                    { value: "yes", label: "Yes" },
+                    { value: "no", label: "No" },
+                  ]}
+                />
+                {/* Trip */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs uppercase tracking-wide text-neutral-400">
+                    Trip
+                  </label>
+                  <select
+                    value={tripName}
+                    onChange={(e) => {
+                      setTripNameFilter(e.target.value);
+                      resetToFirst();
+                    }}
+                    className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
+                  >
+                    <option value="">All Trips</option>
+                    {trips.map((e) => (
+                      <option value={e?.name} key={e?.name}>
+                        {e?.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </details>
           </div>
         </div>
 
@@ -989,5 +1097,70 @@ function PageBtn({ children, disabled, onClick }) {
     >
       {children}
     </button>
+  );
+}
+function SelectMini({ value, onChange, options, label }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-xs uppercase tracking-wide text-neutral-400">
+        {label}
+      </span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-xs text-neutral-300 focus:ring-2 focus:ring-neutral-700"
+      >
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+function SelectLabeled({ value, onChange, options, label }) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label className="text-xs uppercase tracking-wide text-neutral-400">
+        {label}
+      </label>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
+      >
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+function FilterChip({ label, active, onClear }) {
+  return (
+    <span
+      className={[
+        "inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs",
+        active
+          ? "bg-emerald-600/15 text-emerald-300 ring-1 ring-emerald-700/40"
+          : "bg-neutral-800/60 text-neutral-300 ring-1 ring-neutral-700/50",
+      ].join(" ")}
+    >
+      {label}
+      {active && (
+        <button
+          onClick={onClear}
+          className="rounded-md px-1.5 py-0.5 text-[10px] bg-neutral-900/70 hover:bg-neutral-800/70"
+          title="Clear"
+        >
+          ×
+        </button>
+      )}
+    </span>
   );
 }
