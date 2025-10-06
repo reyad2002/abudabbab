@@ -1,6 +1,7 @@
 @import "tailwindcss";
-@plugin "flowbite-react/plugin/tailwindcss";
-@source "../.flowbite-react/class-list.json";
+@import "tw-animate-css";
+
+
 
 /* HTML: <div class="loader"></div> */
 .loader {
@@ -32,3 +33,4 @@
      66%  {inset:-10px;transform: rotate(90deg)}
      100% {inset:0    ;transform: rotate(90deg)}
   }
+
