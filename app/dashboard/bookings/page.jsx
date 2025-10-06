@@ -6,13 +6,24 @@ import { useEffect, useState } from "react";
 import { FaEnvelope, FaWhatsapp } from "react-icons/fa";
 import { exportExsl } from "@/lib/apis/bookingsApi";
 
+import { fetchTripsData } from "../../../lib/apis/tripsApi"; // استيراد الـ action
 export default function BookingsPage() {
   const dispatch = useDispatch();
-  const { list } = useSelector((s) => s.bookings);
+  const { trips, loading, error } = useSelector((state) => state.trips);
+
+  function tripFilter() {
+    trips.map((e) => {
+      console.log(e.name);
+      return ` <option value="${e?.name}">${e?.name}</option>`;
+    });
+  }
 
   const [q, setQ] = useState("");
   const [searchField, setSearchField] = useState("firstName");
   const [transferFilter, setTransferFilter] = useState("all");
+  const [payment, setPaymentFilter] = useState("all");
+  const [checkIn, setcheckInFilter] = useState("all");
+  const [tripName, setTripNameFilter] = useState("");
   const [sort, setSort] = useState("desc"); // NEW: خلي الافتراضي desc
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20);
@@ -56,6 +67,10 @@ export default function BookingsPage() {
     }
     return p;
   };
+  useEffect(() => {
+    // طلب البيانات من الـ API عند تحميل المكون
+    dispatch(fetchTripsData("https://abudabbba-backend.vercel.app/api/trips"));
+  }, [dispatch]);
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -68,6 +83,9 @@ export default function BookingsPage() {
           q,
           searchField,
           transferFilter,
+          payment,
+          checkIn,
+          tripName,
           ...buildDateParams(), // NEW
         };
 
@@ -104,6 +122,9 @@ export default function BookingsPage() {
     from,
     to,
     lastDays,
+    payment,
+    checkIn,
+    tripName
   ]);
 
   const resetToFirst = () => setPage(1);
@@ -336,6 +357,63 @@ export default function BookingsPage() {
               <option value="all">Transfer: All</option>
               <option value="yes">Transfer: Yes</option>
               <option value="no">Transfer: No</option>
+            </select>
+          </div>
+
+          {/* payment Filter */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs uppercase tracking-wide text-neutral-400">
+              paymeny
+            </span>
+            <select
+              value={payment}
+              onChange={(e) => {
+                setPaymentFilter(e.target.value);
+                resetToFirst();
+              }}
+              className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
+            >
+              <option value="all">payment: All</option>
+              <option value="yes">payment: Yes</option>
+              <option value="no">payment: No</option>
+            </select>
+          </div>
+          {/* checkIn Filter */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs uppercase tracking-wide text-neutral-400">
+              checkIn
+            </span>
+            <select
+              value={checkIn}
+              onChange={(e) => {
+                setcheckInFilter(e.target.value);
+                resetToFirst();
+              }}
+              className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
+            >
+              <option value="all">checkIn: All</option>
+              <option value="yes">checkIn: Yes</option>
+              <option value="no">checkIn: No</option>
+            </select>
+          </div>
+
+          {/* tripName Filter */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs uppercase tracking-wide text-neutral-400">
+              trip name
+            </span>
+            <select
+              value={tripName}
+              onChange={(e) => {
+                setTripNameFilter(e.target.value);
+                resetToFirst();
+              }}
+              className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-neutral-300 focus:ring-2 focus:ring-neutral-700"
+            >
+              <option value="">All Trips</option>
+              {trips.map((e) => {
+                return  <option value={e?.name} key={e?.name}>{e?.name}</option>;
+              })}
             </select>
           </div>
 
