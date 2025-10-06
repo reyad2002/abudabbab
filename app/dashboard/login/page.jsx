@@ -41,7 +41,7 @@ const page = () => {
       return;
     }
     try {
-      const res = await fetch(`http://localhost:3001/api/admin/auth/login`, {
+      const res = await fetch(`https://abudabbba-backend.vercel.app/api/admin/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
