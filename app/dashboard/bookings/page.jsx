@@ -7,6 +7,7 @@ import { FaEnvelope, FaWhatsapp } from "react-icons/fa";
 import { exportExsl } from "@/lib/apis/bookingsApi";
 
 import { fetchTripsData } from "../../../lib/apis/tripsApi"; // استيراد الـ action
+import { getToken } from "@/lib/helpers/token";
 export default function BookingsPage() {
   const dispatch = useDispatch();
   const { trips, loading, error } = useSelector((state) => state.trips);
@@ -90,9 +91,15 @@ export default function BookingsPage() {
           ...buildDateParams(), // NEW
         };
         // call using axios
+        const token = await getToken()
         const response = await axios.get(
-          `https://abudabbba-backend.vercel.app/api/bookings/admin`,
-          { params }
+          "https://abudabbba-backend.vercel.app/api/bookings/admin",
+          {
+            params, // your query params
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
 
         if (response.data.bookings?.length === 0 && page > 1) {
@@ -443,14 +450,14 @@ export default function BookingsPage() {
                 dateMode === "none"
                   ? "Date: All time"
                   : dateMode === "day"
-                  ? `Date: ${day || "—"}`
-                  : dateMode === "month"
-                  ? `Month: ${month || "—"}`
-                  : dateMode === "year"
-                  ? `Year: ${year || "—"}`
-                  : dateMode === "range"
-                  ? `Range: ${from || "—"} → ${to || "—"}`
-                  : `Last ${lastDays || "—"} days`
+                    ? `Date: ${day || "—"}`
+                    : dateMode === "month"
+                      ? `Month: ${month || "—"}`
+                      : dateMode === "year"
+                        ? `Year: ${year || "—"}`
+                        : dateMode === "range"
+                          ? `Range: ${from || "—"} → ${to || "—"}`
+                          : `Last ${lastDays || "—"} days`
               }
               active={dateMode !== "none"}
               onClear={() => {
@@ -601,9 +608,8 @@ export default function BookingsPage() {
                       <Td>{r.user.firstName}</Td>
                       <Td className="whitespace-nowrap flex items-center gap-2">
                         <a
-                          href={`https://wa.me/${
-                            "+20" + r.user.phone.replace(/\D/g, "")
-                          }`}
+                          href={`https://wa.me/${"+20" + r.user.phone.replace(/\D/g, "")
+                            }`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-green-500 hover:text-green-400"
@@ -853,10 +859,10 @@ export default function BookingsPage() {
                       <span className="text-neutral-300">Booking Date:</span>{" "}
                       {selectedBooking?.bookingDate
                         ? new Date(
-                            selectedBooking.bookingDate
-                          ).toLocaleDateString("en-GB", {
-                            timeZone: "Africa/Cairo",
-                          })
+                          selectedBooking.bookingDate
+                        ).toLocaleDateString("en-GB", {
+                          timeZone: "Africa/Cairo",
+                        })
                         : "—"}
                     </p>
                     <p className="text-sm">
@@ -1043,18 +1049,18 @@ export default function BookingsPage() {
                         <strong className="text-red-400">Created:</strong>{" "}
                         {selectedBooking?.createdAt
                           ? new Date(selectedBooking.createdAt).toLocaleString(
-                              "en-GB",
-                              { timeZone: "Africa/Cairo" }
-                            )
+                            "en-GB",
+                            { timeZone: "Africa/Cairo" }
+                          )
                           : "—"}
                       </p>
                       <p>
                         <strong className="text-red-400">Updated:</strong>{" "}
                         {selectedBooking?.updatedAt
                           ? new Date(selectedBooking.updatedAt).toLocaleString(
-                              "en-GB",
-                              { timeZone: "Africa/Cairo" }
-                            )
+                            "en-GB",
+                            { timeZone: "Africa/Cairo" }
+                          )
                           : "—"}
                       </p>
                     </div>

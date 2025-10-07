@@ -25,12 +25,18 @@ export default function UsersPage() {
           roleFilter,  // all / admin / manager / user
           sort,        // recent / oldest / nameAsc / nameDesc
         };
-  
+        const token = await getToken()
         const response = await axios.get(
-          `https://abudabbba-backend.vercel.app/api/bookings/admin`,
-          { params }
+          "https://abudabbba-backend.vercel.app/api/bookings/admin",
+          {
+            params, // your query params
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
-        if(response.data.bookings?.length === 0 ){
+        
+        if (response.data.bookings?.length === 0) {
           setPage(0)
         }
         setAllUsers(response.data.bookings); // أو response.data.users حسب الـ API
@@ -39,10 +45,10 @@ export default function UsersPage() {
         console.error(err);
       }
     };
-  
+
     fetchUsers();
   }, [page, limit, q, searchField, roleFilter, sort]); // كل فلتر أو بحث أو صفحة يعيد تحميل البيانات
-  
+
 
   const resetPage = () => setPage(1);
 
@@ -123,7 +129,7 @@ export default function UsersPage() {
             >
               <option value="desc">Newest</option>
               <option value="asc">Oldest</option>
-            
+
             </select>
           </div>
 
@@ -181,9 +187,8 @@ export default function UsersPage() {
                       <Td className="whitespace-nowrap flex items-center gap-2">
                         {" "}
                         <a
-                          href={`https://wa.me/${
-                            "+20" + u.user.phone.replace(/\D/g, "")
-                          }`}
+                          href={`https://wa.me/${"+20" + u.user.phone.replace(/\D/g, "")
+                            }`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-green-500 hover:text-green-400"
@@ -200,8 +205,8 @@ export default function UsersPage() {
                             u.role === "admin"
                               ? "bg-amber-600/25 text-amber-300 ring-amber-500/40"
                               : u.role === "manager"
-                              ? "bg-sky-600/25 text-sky-300 ring-sky-500/40"
-                              : "bg-neutral-700/30 text-neutral-300 ring-neutral-700/50",
+                                ? "bg-sky-600/25 text-sky-300 ring-sky-500/40"
+                                : "bg-neutral-700/30 text-neutral-300 ring-neutral-700/50",
                           ].join(" ")}
                         >
                           {/* {u.role} */}

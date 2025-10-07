@@ -4,6 +4,7 @@ import React, { useCallback, useMemo, useState, useEffect } from "react";
 import QrAutoScanner from "@/_components/uis/QrAutoScanner";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { getToken } from "@/lib/helpers/token";
 
 export default function GatePage() {
   const [status, setStatus] = useState("Point the camera towards the QR code");
@@ -15,6 +16,8 @@ export default function GatePage() {
   const hasResult = useMemo(() => !!decoded, [decoded]);
   const router = useRouter();
 
+  const token = (async () => await getToken())()
+
   const handleScanSuccess = useCallback((text) => {
     try {
       let bid = null;
@@ -22,7 +25,7 @@ export default function GatePage() {
       try {
         const obj = JSON.parse(String(text || ""));
         if (obj && obj.bid) bid = String(obj.bid);
-      } catch (_) {}
+      } catch (_) { }
       // fallback: extract 24-hex id from any string
       if (!bid) {
         const m = String(text || "").match(/[a-f\d]{24}/i);
@@ -63,7 +66,17 @@ export default function GatePage() {
   // Define the API requests for "Mark as Paid" and "Mark as Checked-in"
   const handleMarkAsPaid = async (id) => {
     try {
-      const response = await axios.patch(`https://abudabbba-backend.vercel.app/api/bookings/admin/${id}`, { payment: true });
+      // const response = await axios.patch(`https://abudabbba-backend.vercel.app/api/bookings/admin/${id}`, { payment: true });
+      const response = await axios.patch(
+        `https://abudabbba-backend.vercel.app/api/bookings/admin/${id}`,
+        { payment: true },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            // "Content-Type": "application/json", // axios sets this automatically for plain objects
+          },
+        }
+      );
       console.log(response.data);
       setBooking((prevBooking) => ({
         ...prevBooking,
@@ -76,7 +89,16 @@ export default function GatePage() {
 
   const handleMarkAsCheckedIn = async (id) => {
     try {
-      const response = await axios.patch(`https://abudabbba-backend.vercel.app/api/bookings/admin/${id}`, { checkIn: true });
+      // const response = await axios.patch(`https://abudabbba-backend.vercel.app/api/bookings/admin/${id}`, { checkIn: true });
+      const response = await axios.patch(
+        `https://abudabbba-backend.vercel.app/api/bookings/admin/${id}`,
+        { checkIn: true },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       console.log(response.data);
       setBooking((prevBooking) => ({
         ...prevBooking,
