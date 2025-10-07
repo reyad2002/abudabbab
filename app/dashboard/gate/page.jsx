@@ -6,6 +6,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { getToken } from "@/lib/helpers/token";
 
+
 export default function GatePage() {
   const [status, setStatus] = useState("Point the camera towards the QR code");
   const [error, setError] = useState("");
