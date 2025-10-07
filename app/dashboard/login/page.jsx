@@ -43,6 +43,8 @@ const page = () => {
       // pass creds to the server action
       await login({ email, password }); // this will redirect on success
       // no code after this will run if redirect happens
+      router.replace(next);
+      router.refresh();
     } catch (err) {
       setError(err?.message || "Login failed");
     } finally {
