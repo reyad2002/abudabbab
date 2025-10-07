@@ -12,7 +12,8 @@ const AdminHeader = () => {
   async function logut() {
     try {
       await logout()
-      
+      router.replace("/dashboard/login");
+      router.refresh();
     } catch (error) {
       console.log(error)
     }
