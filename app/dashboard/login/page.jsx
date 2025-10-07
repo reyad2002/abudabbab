@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { User, Lock, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { login } from "@/lib/apis/authApi";
 
 function InlineAlert({ message }) {
   return (
@@ -31,37 +32,17 @@ const page = () => {
   async function Submit(email, password) {
     setLoading(true);
     setError(null);
-    console.log({
-      "email": email,
-      "password": password
-    })
 
     if (!email.trim() || !password) {
       setError("email and password are required.");
+      setLoading(false);
       return;
     }
+
     try {
-      const res = await fetch(`https://abudabbba-backend.vercel.app/api/admin/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body:JSON.stringify({ email, password })
-      });
-      if (!res.ok) {
-        const { error } = await res.json().catch(() => ({ error: "Login failed" }));
-
-        setError(JSON.parse(error).message || "Login failed");
-
-      }
-
-      const { succeeded, error } = await res.json();
-      if (succeeded === false) {
-        setError(error || "Login failed");
-        return;
-      }
-
-      router.replace(next);
-      router.refresh();
+      // pass creds to the server action
+      await login({ email, password }); // this will redirect on success
+      // no code after this will run if redirect happens
     } catch (err) {
       setError(err?.message || "Login failed");
     } finally {
