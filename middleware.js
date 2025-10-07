@@ -1,9 +1,8 @@
 // middleware.ts (project root)
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
 const COOKIE_NAME = "access_token";
 
-export function middleware(req: NextRequest) {
+export function middleware(req) {
   const { pathname } = req.nextUrl;
 
   // Protect /admin routes except the login page itself
