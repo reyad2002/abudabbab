@@ -16,7 +16,7 @@ export default function GatePage() {
   const hasResult = useMemo(() => !!decoded, [decoded]);
   const router = useRouter();
 
-  const token = (async () => await getToken())()
+
 
   const handleScanSuccess = useCallback((text) => {
     try {
@@ -65,6 +65,7 @@ export default function GatePage() {
 
   // Define the API requests for "Mark as Paid" and "Mark as Checked-in"
   const handleMarkAsPaid = async (id) => {
+    const token = await getToken()
     try {
       // const response = await axios.patch(`https://abudabbba-backend.vercel.app/api/bookings/admin/${id}`, { payment: true });
       const response = await axios.patch(
@@ -88,6 +89,7 @@ export default function GatePage() {
   };
 
   const handleMarkAsCheckedIn = async (id) => {
+    const token = await getToken()
     try {
       // const response = await axios.patch(`https://abudabbba-backend.vercel.app/api/bookings/admin/${id}`, { checkIn: true });
       const response = await axios.patch(
@@ -113,11 +115,18 @@ export default function GatePage() {
     if (!decoded?.bid) return;
     let cancelled = false;
     async function fetchBooking() {
+      const token = await getToken()
       setLoading(true);
       setError("");
       try {
+
         const response = await axios.get(
-          `https://abudabbba-backend.vercel.app/api/bookings/admin/${decoded.bid}`
+          `https://abudabbba-backend.vercel.app/api/bookings/admin/${decoded.bid}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
         if (!cancelled) setBooking(response.data);
       } catch (error) {
