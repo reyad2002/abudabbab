@@ -32,19 +32,17 @@ const page = () => {
   async function Submit(email, password) {
     setLoading(true);
     setError(null);
-
-    if (!email.trim() || !password) {
-      setError("email and password are required.");
-      setLoading(false);
-      return;
-    }
-
     try {
-      // pass creds to the server action
-      await login({ email, password }); // this will redirect on success
-      // no code after this will run if redirect happens
-      router.replace(next);
-      router.refresh();
+      // either let the server action redirect...
+      await login({ email, password, redirectTo: "/dashboard" });
+
+      // ...or, if you pass redirectTo: undefined above,
+      // you can do client-side navigation here:
+      const { succeeded } = await login({ email, password });
+      if (succeeded) {
+        router.replace(next);
+        router.refresh();
+      }
     } catch (err) {
       setError(err?.message || "Login failed");
     } finally {
