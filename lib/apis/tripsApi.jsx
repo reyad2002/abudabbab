@@ -6,7 +6,8 @@ import { getToken } from "../helpers/token";
 export const fetchTripsData = createAsyncThunk(
   "trips/fetchTripsData",
   async (url) => {
-    const token = getToken()
+    const token = await getToken()
+    console.log(token)
     // const response = await axios.get(url);
     const response = await axios.get(url, {
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
