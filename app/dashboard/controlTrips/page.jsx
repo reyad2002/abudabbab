@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteTrip, fetchTripsData, clearError } from "../../../lib/apis/tripsApi";
+import { deleteTrip, fetchTripsData } from "../../../lib/apis/tripsApi";
 import Link from "next/link";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -122,7 +122,7 @@ export default function DashboardTrips() {
 
   // retry function
   const handleRetry = () => {
-    dispatch(clearError());
+    // dispatch(clearError());
     dispatch(fetchTripsData(API_LIST));
   };
 
