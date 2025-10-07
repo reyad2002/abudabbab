@@ -10,7 +10,8 @@ export const fetchTripsData = createAsyncThunk(
     
     // const response = await axios.get(url);
     const response = await getTrips(url)
-    return response.data.data;
+    // console.log(response)
+    return response.data;
   }
 );
 // POST trip
