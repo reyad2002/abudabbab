@@ -2,16 +2,14 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import { getToken } from "../helpers/token";
+import { getTrips } from "./api";
 // GET all trips
 export const fetchTripsData = createAsyncThunk(
   "trips/fetchTripsData",
   async (url) => {
-    const token = await getToken()
-    console.log(token)
+    
     // const response = await axios.get(url);
-    const response = await axios.get(url, {
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-      });
+    const response = await getTrips(url)
     return response.data.data;
   }
 );
